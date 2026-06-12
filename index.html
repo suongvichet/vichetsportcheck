@@ -203,6 +203,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px
 .setup-box code{background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:3px;font-size:12px}
 .setup-box a{color:inherit;text-decoration:underline}
 .sample-note{font-size:12px;color:var(--muted);margin-bottom:12px}
+.refresh-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.refresh-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all 0.15s}
+.refresh-btn:hover{background:var(--surface3);border-color:var(--wc)}
+.refresh-btn:disabled{opacity:0.45;cursor:not-allowed}
+.refresh-btn.spinning svg{animation:spin 0.7s linear infinite}
+.req-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--wcdim);color:var(--wc)}
+.req-badge.warn{background:rgba(217,119,6,0.15);color:var(--draw)}
+.req-badge.danger{background:var(--lossbg);color:var(--loss)}
+.last-updated{font-size:11px;color:var(--muted2);margin-left:auto}
+.live-banner{background:rgba(232,0,45,0.08);border:1px solid rgba(232,0,45,0.25);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--f1);display:flex;align-items:center;gap:7px;margin-bottom:14px;display:none}
+.live-banner.show{display:flex}
 
 footer{text-align:center;padding:2rem 1rem;color:var(--muted2);font-size:11px;border-top:1px solid var(--border);margin-top:2rem}
 footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
@@ -281,6 +292,20 @@ footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
     <div class="wc-meta">FIFA World Cup 2026 · USA · Canada · Mexico</div>
   </div>
 
+  <div class="live-banner" id="live-banner">
+    <span class="ldot" style="width:8px;height:8px;background:var(--f1);border-radius:50%;animation:blink 1s infinite;display:inline-block"></span>
+    Match in progress — data refreshes automatically every 60 seconds
+  </div>
+
+  <div class="refresh-bar">
+    <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M20 9A9 9 0 0 0 5.64 5.64M4 15a9 9 0 0 0 14.36 3.36"/></svg>
+      Refresh scores
+    </button>
+    <span class="req-badge" id="req-badge">– / 100 today</span>
+    <span class="last-updated" id="last-updated">Not yet updated</span>
+  </div>
+
   <!-- OVERVIEW -->
   <div class="wc-section active" id="wc-overview">
     <div class="wc-stat-row">
@@ -323,7 +348,7 @@ footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 
 <footer>
   F1 via <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1 API</a> ·
-  World Cup via <a href="https://www.football-data.org/" target="_blank">football-data.org</a> ·
+  World Cup via <a href="https://www.api-football.com" target="_blank">API-Football</a> (free tier) ·
   Hosted on GitHub Pages
 </footer>
 
@@ -468,221 +493,274 @@ async function f1Schedule(){
   }catch(e){el.innerHTML=`<div class="err">Could not load schedule. ${e.message}</div>`}
 }
 
-// ── WORLD CUP (football-data.org) ─────────────────────────────────────
-// Get free key at: https://www.football-data.org/client/register
-// Replace YOUR_API_KEY below with your actual key
-const FD_KEY='421b5fcbaf784303b99450ea738c54a9';
-const WC_BASE='https://api.football-data.org/v4/competitions/2000';
+// ── WORLD CUP — API-Football (api-sports.io) ──────────────────────────
+// Get your FREE key at: https://dashboard.api-sports.io/register
+// Replace YOUR_API_KEY below — 100 free requests per day, resets midnight UTC
+const AF_KEY = 'YOUR_API_KEY';
+const AF_BASE = 'https://v3.football.api-sports.io';
+const WC_LEAGUE = 1;
+const WC_SEASON = 2026;
 
-async function fdFetch(path){
-  const r=await fetch(WC_BASE+path,{headers:{'X-Auth-Token':FD_KEY}});
-  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+let reqUsed = parseInt(localStorage.getItem('af_req_used') || '0');
+let reqDate = localStorage.getItem('af_req_date') || '';
+let liveTimer = null;
+
+function todayUTC(){ return new Date().toISOString().slice(0,10); }
+
+function trackRequest(headers){
+  const used = parseInt(headers.get('x-ratelimit-requests-limit') && headers.get('x-rateLimit-requests-remaining')
+    ? (100 - parseInt(headers.get('x-rateLimit-requests-remaining')))
+    : reqUsed + 1);
+  const today = todayUTC();
+  if(reqDate !== today){ reqUsed = 0; reqDate = today; }
+  reqUsed = used;
+  localStorage.setItem('af_req_used', reqUsed);
+  localStorage.setItem('af_req_date', today);
+  updateReqBadge();
+}
+
+function updateReqBadge(){
+  const today = todayUTC();
+  if(reqDate !== today){ reqUsed = 0; }
+  const el = document.getElementById('req-badge');
+  if(!el) return;
+  const left = 100 - reqUsed;
+  el.textContent = `${reqUsed} / 100 used today`;
+  el.className = 'req-badge' + (left <= 10 ? ' danger' : left <= 30 ? ' warn' : '');
+}
+
+function setLastUpdated(){
+  const el = document.getElementById('last-updated');
+  if(el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+async function afFetch(path){
+  if(AF_KEY === 'YOUR_API_KEY') throw new Error('NO_KEY');
+  const today = todayUTC();
+  if(reqDate !== today){ reqUsed = 0; reqDate = today; }
+  if(reqUsed >= 100) throw new Error('LIMIT');
+  const r = await fetch(`${AF_BASE}${path}`, {
+    headers: { 'x-apisports-key': AF_KEY }
+  });
+  trackRequest(r.headers);
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
 
 async function loadWC(){
-  if(FD_KEY==='YOUR_API_KEY'){wcDemo();return}
+  if(AF_KEY === 'YOUR_API_KEY'){
+    showKeyPrompt();
+    return;
+  }
+  await refreshWC();
+}
+
+async function manualRefresh(){
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
+  btn.classList.add('spinning');
+  await refreshWC();
+  btn.disabled = false;
+  btn.classList.remove('spinning');
+}
+
+async function refreshWC(){
   try{
-    const[standings,matches]=await Promise.all([
-      fdFetch('/standings'),
-      fdFetch('/matches')
+    const today = todayUTC();
+    if(reqDate !== today){ reqUsed = 0; reqDate = today; }
+    if(reqUsed >= 98){
+      showLimitWarning();
+      return;
+    }
+
+    const [fixturesRes, standingsRes] = await Promise.all([
+      afFetch(`/fixtures?league=${WC_LEAGUE}&season=${WC_SEASON}`),
+      afFetch(`/standings?league=${WC_LEAGUE}&season=${WC_SEASON}`)
     ]);
-    const finished=(matches.matches||[]).filter(m=>m.status==='FINISHED');
-    const scheduled=(matches.matches||[]).filter(m=>m.status==='SCHEDULED'||m.status==='TIMED');
-    const goals=finished.reduce((a,m)=>a+(m.score.fullTime.home||0)+(m.score.fullTime.away||0),0);
-    document.getElementById('wc-goals').textContent=goals;
-    document.getElementById('wc-played').textContent=finished.length;
-    document.getElementById('wc-gpg').textContent=finished.length?+(goals/finished.length).toFixed(1):0;
-    buildScorers(finished);
-    buildGoalsChart(finished);
-    buildOverviewResults(finished.slice(-3).reverse());
-    buildGroups(standings);
-    buildResults(finished.slice(-9).reverse());
-    buildFixtures(scheduled.slice(0,10));
+
+    const fixtures = fixturesRes.response || [];
+    const finished = fixtures.filter(f => f.fixture.status.short === 'FT' || f.fixture.status.short === 'AET' || f.fixture.status.short === 'PEN');
+    const live = fixtures.filter(f => ['1H','HT','2H','ET','BT','P','INT'].includes(f.fixture.status.short));
+    const upcoming = fixtures.filter(f => f.fixture.status.short === 'NS').sort((a,b)=>new Date(a.fixture.date)-new Date(b.fixture.date));
+
+    const totalGoals = finished.reduce((a,f)=>a+(f.goals.home||0)+(f.goals.away||0),0);
+    document.getElementById('wc-goals').textContent = totalGoals || '–';
+    document.getElementById('wc-played').textContent = finished.length || '–';
+    document.getElementById('wc-gpg').textContent = finished.length ? +(totalGoals/finished.length).toFixed(1) : '–';
+
+    const liveBanner = document.getElementById('live-banner');
+    if(live.length > 0){
+      liveBanner.classList.add('show');
+      liveBanner.innerHTML = `<span style="width:8px;height:8px;background:var(--f1);border-radius:50%;animation:blink 1s infinite;display:inline-block"></span>
+        🔴 ${live.length} match${live.length>1?'es':''} live now — auto-refreshing every 60s`;
+      startLivePolling();
+    } else {
+      liveBanner.classList.remove('show');
+      stopLivePolling();
+    }
+
+    buildAFScorers(fixtures);
+    buildAFGoalsChart(finished);
+    buildAFOverviewResults([...live, ...finished.slice(-3).reverse()].slice(0,3));
+    buildAFGroups(standingsRes.response);
+    buildAFResults([...live, ...finished.slice(-9).reverse()].slice(0,9));
+    buildAFFixtures(upcoming.slice(0,10));
+    setLastUpdated();
+    updateReqBadge();
+
   }catch(e){
-    const msg=`<div class="err">Could not load data: ${e.message}</div>`;
+    if(e.message === 'LIMIT'){ showLimitWarning(); return; }
+    if(e.message === 'NO_KEY'){ showKeyPrompt(); return; }
+    const msg = `<div class="err">Could not load data: ${e.message}</div>`;
     ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
-      .forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=msg});
+      .forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=msg; });
   }
 }
 
-function buildScorers(matches){
-  const el=document.getElementById('wc-scorers');
-  const counts={};
-  matches.forEach(m=>{
-    (m.goals||[]).forEach(g=>{
-      if(!g.scorer)return;
-      const k=g.scorer.name;
-      if(!counts[k])counts[k]={name:k,team:m.homeTeam.name,goals:0};
+function startLivePolling(){
+  if(liveTimer) return;
+  liveTimer = setInterval(()=>{ if(reqUsed < 98) refreshWC(); }, 60000);
+}
+function stopLivePolling(){
+  if(liveTimer){ clearInterval(liveTimer); liveTimer=null; }
+}
+
+function showKeyPrompt(){
+  const msg = `<div class="err" style="background:rgba(26,163,74,0.08);border-color:rgba(26,163,74,0.3);color:var(--wc)">
+    <strong>Add your API key to see live data:</strong><br>
+    1. Register free at <a href="https://dashboard.api-sports.io/register" target="_blank" style="color:inherit">dashboard.api-sports.io</a><br>
+    2. In <code style="background:rgba(0,0,0,0.2);padding:1px 5px;border-radius:3px">index.html</code>, replace <code style="background:rgba(0,0,0,0.2);padding:1px 5px;border-radius:3px">YOUR_API_KEY</code> with your key
+  </div>`;
+  ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=msg; });
+}
+
+function showLimitWarning(){
+  const msg = `<div class="err" style="background:rgba(217,119,6,0.08);border-color:rgba(217,119,6,0.3);color:var(--draw)">
+    ⚠️ Daily limit of 100 requests reached. Data will resume updating after midnight UTC.
+    <br>Last data shown is from your most recent refresh.
+  </div>`;
+  ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
+    .forEach(id=>{ const el=document.getElementById(id); if(el&&el.innerHTML.includes('loading')) el.innerHTML=msg; });
+}
+
+function buildAFScorers(fixtures){
+  const el = document.getElementById('wc-scorers');
+  const counts = {};
+  fixtures.forEach(f=>{
+    (f.events||[]).forEach(e=>{
+      if(e.type!=='Goal'||e.detail==='Own Goal') return;
+      const k = e.player.name;
+      const team = e.team.name;
+      if(!counts[k]) counts[k]={name:k,team,goals:0};
       counts[k].goals++;
     });
   });
-  const sorted=Object.values(counts).sort((a,b)=>b.goals-a.goals).slice(0,5);
+  const sorted = Object.values(counts).sort((a,b)=>b.goals-a.goals).slice(0,5);
   if(!sorted.length){
-    el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">Scorer data not available yet</div>';return;
+    el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goals scored yet</div>';return;
   }
-  const rows=sorted.map((s,i)=>`
+  el.innerHTML=`<div class="panel">${sorted.map((s,i)=>`
     <div class="scorer-row">
       <div class="scorer-left">
         <div class="scorer-rank ${i===0?'r1':''}">${i+1}</div>
         <div><div class="scorer-name">${tf(s.team)} ${s.name}</div><div class="scorer-team">${s.team}</div></div>
       </div>
       <div class="scorer-goals">${s.goals} ⚽</div>
-    </div>`).join('');
-  el.innerHTML=`<div class="panel">${rows}</div>`;
+    </div>`).join('')}</div>`;
 }
 
-function buildGoalsChart(matches){
-  const el=document.getElementById('wc-goals-chart');
-  const gmap={};
-  matches.forEach(m=>{
-    const g=(m.score.fullTime.home||0)+(m.score.fullTime.away||0);
-    const grp=m.group||'Other';
-    gmap[grp]=(gmap[grp]||0)+g;
+function buildAFGoalsChart(finished){
+  const el = document.getElementById('wc-goals-chart');
+  const gmap = {};
+  finished.forEach(f=>{
+    const grp = f.league.round||'Other';
+    const g = (f.goals.home||0)+(f.goals.away||0);
+    gmap[grp] = (gmap[grp]||0)+g;
   });
-  const entries=Object.entries(gmap).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  if(!entries.length){el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goal data yet</div>';return}
-  const max=Math.max(...entries.map(e=>e[1]));
-  const rows=entries.map(([grp,g])=>`
+  const entries = Object.entries(gmap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!entries.length){el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goals yet</div>';return}
+  const max = Math.max(...entries.map(e=>e[1]));
+  el.innerHTML=`<div class="panel">${entries.map(([grp,g])=>`
     <div class="bar-row">
       <div class="bar-lbl"><span>${grp}</span><span>${g}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.round(g/max*100)}%"></div></div>
-    </div>`).join('');
-  el.innerHTML=`<div class="panel">${rows}</div>`;
+    </div>`).join('')}</div>`;
 }
 
-function buildOverviewResults(matches){
-  const el=document.getElementById('wc-overview-results');
-  if(!matches.length){el.innerHTML='<div class="err">No results yet</div>';return}
-  el.innerHTML=`<div class="three-col">${matches.map(m=>matchCard(m)).join('')}</div>`;
+function buildAFOverviewResults(matches){
+  const el = document.getElementById('wc-overview-results');
+  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No matches played yet</div>';return}
+  el.innerHTML=`<div class="three-col">${matches.map(f=>afMatchCard(f)).join('')}</div>`;
 }
 
-function buildGroups(standings){
-  const el=document.getElementById('wc-groups-inner');
-  const groups=(standings.standings||[]).filter(s=>s.type==='TOTAL'&&s.group);
-  if(!groups.length){el.innerHTML='<div class="err">Group stage not yet available</div>';return}
-  const cards=groups.map(g=>{
-    const rows=g.table.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
-      `<div class="grow"><div class="grow-team ${i<2?'q':''}">${tf(t.team.name)} ${t.team.shortName||t.team.name}</div>
-       <span class="grow-n">${t.playedGames}</span><span class="grow-n">${t.won}</span><span class="grow-n">${t.lost}</span><span class="grow-pts">${t.points}</span></div>`
+function buildAFGroups(standingsData){
+  const el = document.getElementById('wc-groups-inner');
+  if(!standingsData||!standingsData.length){el.innerHTML='<div class="err">Group data not yet available</div>';return}
+  const groups = standingsData[0]?.league?.standings||[];
+  if(!groups.length){el.innerHTML='<div class="err">No group data yet</div>';return}
+  const cards = groups.map(group=>{
+    const rows = group.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
+      `<div class="grow"><div class="grow-team ${i<2&&t.all.played>0?'q':''}">${tf(t.team.name)} ${t.team.name}</div>
+       <span class="grow-n">${t.all.played}</span><span class="grow-n">${t.all.win}</span><span class="grow-n">${t.all.lose}</span><span class="grow-pts">${t.points}</span></div>`
     ).join('');
+    const gname = group[0]?.group||'Group';
     return`<div class="group-card">
-      <div class="group-head"><span class="group-head-name">${g.group}</span><span class="group-head-info">${g.table[0]?.playedGames||0} of 3 played</span></div>
+      <div class="group-head"><span class="group-head-name">${gname}</span><span class="group-head-info">${group[0]?.all?.played||0} of 3 played</span></div>
       <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>
       ${rows}</div>`;
   }).join('');
   el.innerHTML=`<div class="groups-grid">${cards}</div>`;
 }
 
-function buildResults(matches){
-  const el=document.getElementById('wc-results-inner');
-  if(!matches.length){el.innerHTML='<div class="err">No results yet</div>';return}
-  el.innerHTML=`<div class="three-col">${matches.map(m=>matchCard(m)).join('')}</div>`;
+function buildAFResults(matches){
+  const el = document.getElementById('wc-results-inner');
+  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No results yet</div>';return}
+  el.innerHTML=`<div class="three-col">${matches.map(f=>afMatchCard(f)).join('')}</div>`;
 }
 
-function buildFixtures(matches){
-  const el=document.getElementById('wc-fixtures-inner');
-  if(!matches.length){el.innerHTML='<div class="err">No upcoming fixtures</div>';return}
-  const rows=matches.map(m=>`
+function buildAFFixtures(matches){
+  const el = document.getElementById('wc-fixtures-inner');
+  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No upcoming fixtures</div>';return}
+  const rows = matches.map(f=>`
     <div class="fix-row">
-      <div class="fix-teams">${tf(m.homeTeam.name)} <span>${tf(m.homeTeam.name)} ${m.homeTeam.shortName||m.homeTeam.name}</span>
+      <div class="fix-teams">${tf(f.teams.home.name)} <span>${tf(f.teams.home.name)} ${f.teams.home.name}</span>
         <span class="fix-vs">vs</span>
-        ${tf(m.awayTeam.name)} <span>${tf(m.awayTeam.name)} ${m.awayTeam.shortName||m.awayTeam.name}</span></div>
-      <div class="fix-right"><div class="fix-date">${fShort(m.utcDate)} · ${m.group||''}</div><div class="fix-time">${fTime(m.utcDate)}</div></div>
+        ${tf(f.teams.away.name)} <span>${tf(f.teams.away.name)} ${f.teams.away.name}</span></div>
+      <div class="fix-right">
+        <div class="fix-date">${fShort(f.fixture.date)} · ${f.league.round||''}</div>
+        <div class="fix-time">${fTime(f.fixture.date)}</div>
+      </div>
     </div>`).join('');
   el.innerHTML=`<div class="fix-panel">${rows}</div>`;
 }
 
-function matchCard(m){
-  const hs=m.score.fullTime.home,as=m.score.fullTime.away;
-  const hw=hs>as,aw=as>hs,draw=hs===as;
-  const pill=draw?'<span class="rpill rpill-d">Draw</span>':'<span class="rpill rpill-ft">FT</span>';
-  return`<div class="match-card">
-    <div class="match-top"><span>${m.group||''} · ${fShort(m.utcDate)}</span>${pill}</div>
+function afMatchCard(f){
+  const status = f.fixture.status.short;
+  const isLive = ['1H','HT','2H','ET','BT','P','INT'].includes(status);
+  const isDone = ['FT','AET','PEN'].includes(status);
+  const hs = f.goals.home ?? '–';
+  const as = f.goals.away ?? '–';
+  const hw = isDone && hs > as;
+  const aw = isDone && as > hs;
+  const draw = isDone && hs === as;
+  const elapsed = f.fixture.status.elapsed;
+  let pill = '';
+  if(isLive) pill = `<span class="rpill" style="background:rgba(232,0,45,0.15);color:var(--f1);animation:blink 1.5s infinite">${elapsed?elapsed+"'":status}</span>`;
+  else if(draw) pill = `<span class="rpill rpill-d">Draw</span>`;
+  else if(isDone) pill = `<span class="rpill rpill-ft">FT</span>`;
+  else pill = `<span class="rpill" style="background:var(--surface2);color:var(--muted2)">${fTime(f.fixture.date)}</span>`;
+  return`<div class="match-card" ${isLive?'style="border-color:rgba(232,0,45,0.4)"':''}>
+    <div class="match-top"><span>${f.league.round||''} · ${fShort(f.fixture.date)}</span>${pill}</div>
     <div class="match-body">
-      <div class="mt"><span class="mt-flag">${tf(m.homeTeam.name)}</span><span class="mt-name">${tf(m.homeTeam.name)} ${m.homeTeam.shortName||m.homeTeam.name}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(f.teams.home.name)}</span><span class="mt-name">${tf(f.teams.home.name)} ${f.teams.home.name}</span></div>
       <div class="score-box"><span class="${hw?'sw':'sl'}">${hs}</span><span class="ssep">–</span><span class="${aw?'sw':'sl'}">${as}</span></div>
-      <div class="mt"><span class="mt-flag">${tf(m.awayTeam.name)}</span><span class="mt-name">${tf(m.awayTeam.name)} ${m.awayTeam.shortName||m.awayTeam.name}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(f.teams.away.name)}</span><span class="mt-name">${tf(f.teams.away.name)} ${f.teams.away.name}</span></div>
     </div></div>`;
 }
 
-// ── DEMO MODE (no API key) ─────────────────────────────────────────────
-function wcDemo(){
-  document.getElementById('wc-goals').textContent='58';
-  document.getElementById('wc-played').textContent='24';
-  document.getElementById('wc-gpg').textContent='2.4';
-
-  document.getElementById('wc-scorers').innerHTML=`<div class="panel">
-    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank r1">1</div><div><div class="scorer-name">🇧🇷 R. Endrick</div><div class="scorer-team">Brazil</div></div></div><div class="scorer-goals">5 ⚽</div></div>
-    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">2</div><div><div class="scorer-name">🇫🇷 K. Mbappé</div><div class="scorer-info-team">France</div></div></div><div class="scorer-goals">4 ⚽</div></div>
-    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">3</div><div><div class="scorer-name">🇦🇷 L. Messi</div><div class="scorer-team">Argentina</div></div></div><div class="scorer-goals">3 ⚽</div></div>
-    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">4</div><div><div class="scorer-name">🇵🇹 R. Leão</div><div class="scorer-team">Portugal</div></div></div><div class="scorer-goals">3 ⚽</div></div>
-    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">5</div><div><div class="scorer-name">🇩🇪 J. Wirtz</div><div class="scorer-team">Germany</div></div></div><div class="scorer-goals">2 ⚽</div></div>
-  </div>`;
-
-  document.getElementById('wc-goals-chart').innerHTML=`<div class="panel">
-    ${[['🇫🇷 Group D',8,73],['🇺🇸 Group A',9,82],['🇧🇷 Group C',11,100],['🇪🇸 Group B',7,64],['🇩🇪 Group E',6,55],['🇯🇵 Group F',5,45]].map(([g,n,w])=>`
-    <div class="bar-row"><div class="bar-lbl"><span>${g}</span><span>${n}</span></div><div class="bar-track"><div class="bar-fill" style="width:${w}%"></div></div></div>`).join('')}
-  </div>`;
-
-  const demo3=[
-    {g:'Group C',d:'Jun 14',h:'Brazil',a:'Chile',hs:3,as:0},
-    {g:'Group A',d:'Jun 14',h:'USA',a:'Mexico',hs:2,as:1},
-    {g:'Group B',d:'Jun 15',h:'Spain',a:'Morocco',hs:1,as:1}
-  ];
-  document.getElementById('wc-overview-results').innerHTML=`<div class="three-col">${demo3.map(m=>`
-    <div class="match-card"><div class="match-top"><span>${m.g} · ${m.d}</span><span class="rpill rpill-ft">FT</span></div>
-    <div class="match-body">
-      <div class="mt"><span class="mt-flag">${tf(m.h)}</span><span class="mt-name">${tf(m.h)} ${m.h}</span></div>
-      <div class="score-box"><span class="${m.hs>m.as?'sw':'sl'}">${m.hs}</span><span class="ssep">–</span><span class="${m.as>m.hs?'sw':'sl'}">${m.as}</span></div>
-      <div class="mt"><span class="mt-flag">${tf(m.a)}</span><span class="mt-name">${tf(m.a)} ${m.a}</span></div>
-    </div></div>`).join('')}</div>`;
-
-  const setup=``;
-
-  const demoGroups=[
-    {name:'Group A',teams:[{n:'USA',p:2,w:2,l:0,pts:6},{n:'Mexico',p:2,w:1,l:1,pts:3},{n:'Panama',p:2,w:0,l:1,pts:1},{n:'Bolivia',p:2,w:0,l:2,pts:0}]},
-    {name:'Group B',teams:[{n:'Spain',p:2,w:1,l:0,pts:4},{n:'Croatia',p:2,w:1,l:1,pts:3},{n:'Morocco',p:2,w:0,l:0,pts:2},{n:'Japan',p:2,w:0,l:1,pts:1}]},
-    {name:'Group C',teams:[{n:'Brazil',p:2,w:2,l:0,pts:6},{n:'Germany',p:2,w:1,l:1,pts:3},{n:'Serbia',p:2,w:0,l:1,pts:1},{n:'Chile',p:2,w:0,l:2,pts:0}]},
-    {name:'Group D',teams:[{n:'France',p:2,w:1,l:0,pts:4},{n:'Argentina',p:2,w:1,l:0,pts:4},{n:'Denmark',p:2,w:0,l:1,pts:1},{n:'Ecuador',p:2,w:0,l:2,pts:0}]},
-  ];
-  const gcards=demoGroups.map(g=>{
-    const rows=g.teams.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
-      `<div class="grow"><div class="grow-team ${i<2?'q':''}">${tf(t.n)} ${t.n}</div>
-       <span class="grow-n">${t.p}</span><span class="grow-n">${t.w}</span><span class="grow-n">${t.l}</span><span class="grow-pts">${t.pts}</span></div>`
-    ).join('');
-    return`<div class="group-card"><div class="group-head"><span class="group-head-name">${g.name}</span></div>
-      <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>${rows}</div>`;
-  }).join('');
-  document.getElementById('wc-groups-inner').innerHTML=setup+`<div class="groups-grid">${gcards}</div>`;
-
-  const demoResults=[
-    {g:'Group C',d:'Jun 14',h:'Brazil',a:'Chile',hs:3,as:0},{g:'Group A',d:'Jun 14',h:'USA',a:'Mexico',hs:2,as:1},
-    {g:'Group B',d:'Jun 15',h:'Spain',a:'Morocco',hs:1,as:1},{g:'Group D',d:'Jun 15',h:'France',a:'Ecuador',hs:2,as:0},
-    {g:'Group C',d:'Jun 16',h:'Germany',a:'Serbia',hs:2,as:1},{g:'Group D',d:'Jun 16',h:'Argentina',a:'Denmark',hs:0,as:0}
-  ];
-  document.getElementById('wc-results-inner').innerHTML=setup+`<div class="three-col">${demoResults.map(m=>`
-    <div class="match-card"><div class="match-top"><span>${m.g} · ${m.d}</span><span class="rpill rpill-ft">FT</span></div>
-    <div class="match-body">
-      <div class="mt"><span class="mt-flag">${tf(m.h)}</span><span class="mt-name">${tf(m.h)} ${m.h}</span></div>
-      <div class="score-box"><span class="${m.hs>m.as?'sw':'sl'}">${m.hs}</span><span class="ssep">–</span><span class="${m.as>m.hs?'sw':'sl'}">${m.as}</span></div>
-      <div class="mt"><span class="mt-flag">${tf(m.a)}</span><span class="mt-name">${tf(m.a)} ${m.a}</span></div>
-    </div></div>`).join('')}</div>`;
-
-  const demoFix=[
-    {h:'Japan',a:'Croatia',d:'Jun 17',t:'18:00',g:'Group B'},{h:'Panama',a:'Bolivia',d:'Jun 17',t:'21:00',g:'Group A'},
-    {h:'Brazil',a:'Serbia',d:'Jun 18',t:'18:00',g:'Group C'},{h:'Mexico',a:'USA',d:'Jun 18',t:'21:00',g:'Group A'},
-    {h:'Argentina',a:'Ecuador',d:'Jun 19',t:'18:00',g:'Group D'},{h:'France',a:'Denmark',d:'Jun 19',t:'21:00',g:'Group D'},
-    {h:'Spain',a:'Japan',d:'Jun 20',t:'18:00',g:'Group B'},{h:'Germany',a:'Chile',d:'Jun 20',t:'21:00',g:'Group C'}
-  ];
-  document.getElementById('wc-fixtures-inner').innerHTML=setup+`<div class="fix-panel">${demoFix.map(f=>`
-    <div class="fix-row">
-      <div class="fix-teams">${tf(f.h)} <span>${tf(f.h)} ${f.h}</span><span class="fix-vs">vs</span>${tf(f.a)} <span>${tf(f.a)} ${f.a}</span></div>
-      <div class="fix-right"><div class="fix-date">${f.d} · ${f.g}</div><div class="fix-time">${f.t}</div></div>
-    </div>`).join('')}</div>`;
-}
-
 // ── INIT ───────────────────────────────────────────────────────────────
+updateReqBadge();
 loadF1();
 loadWC();
 </script>
