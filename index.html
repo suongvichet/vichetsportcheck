@@ -261,14 +261,14 @@ function fDateShort(s){ return new Date(s).toLocaleDateString('en-GB',{day:'nume
 function fTime(s){ return new Date(s).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
 function posBadge(p){ const c=p==1?'p1':p==2?'p2':p==3?'p3':''; return `<span class="pos ${c}">${p}</span>`; }
 
-const F1 = 'https://api.jolpica.com/ergast/f1/current';
+const F1 = 'https://api.jolpi.ca/ergast/f1/current';
 
 async function loadF1(){ await Promise.all([f1Drivers(), f1Constructors(), f1Schedule()]); }
 
 async function f1Drivers(){
   const el = document.getElementById('f1-drivers');
   try{
-    const j = await (await fetch(`${F1}/driverstandings/`)).json();
+    const j = await (await fetch(`${F1}/driverstandings.json`)).json();
     const list = j.MRData.StandingsTable.StandingsLists[0];
     document.getElementById('f1-season').textContent = j.MRData.StandingsTable.season;
     const s = list?.DriverStandings || [];
@@ -288,7 +288,7 @@ async function f1Drivers(){
 async function f1Constructors(){
   const el = document.getElementById('f1-constructors');
   try{
-    const j = await (await fetch(`${F1}/constructorstandings/`)).json();
+    const j = await (await fetch(`${F1}/constructorstandings.json`)).json();
     const s = j.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || [];
     document.getElementById('f1-teams-count').textContent = s.length || '–';
     if(!s.length){ el.innerHTML = '<div class="error">No constructor standings yet.</div>'; return; }
@@ -307,8 +307,8 @@ async function f1Schedule(){
   const el = document.getElementById('f1-schedule');
   try{
     const [sj, rj] = await Promise.all([
-      (await fetch(`${F1}/races/`)).json(),
-      (await fetch(`${F1}/results/1/`)).json()
+      (await fetch(`${F1}/races.json`)).json(),
+      (await fetch(`${F1}/results/1.json`)).json()
     ]);
     const races = sj.MRData.RaceTable.Races;
     document.getElementById('f1-rounds').textContent = races.length || '–';
@@ -335,7 +335,7 @@ async function f1Schedule(){
   }catch(e){ el.innerHTML = `<div class="error">Could not load schedule. ${e.message}</div>`; }
 }
 
-const FD_KEY = '421b5fcbaf784303b99450ea738c54a9';
+const FD_KEY = 'YOUR_API_KEY';
 const WC = 'https://api.football-data.org/v4/competitions/2000';
 
 async function fd(path){
