@@ -8,434 +8,681 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  :root {
-    --bg: #0d0f14;
-    --surface: #161920;
-    --surface2: #1e2130;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #f0f2f7;
-    --muted: rgba(240,242,247,0.45);
-    --muted2: rgba(240,242,247,0.35);
-    --f1: #e8002d;
-    --wc: #1a9e5c;
-    --gold: #f5c842;
-    --silver: #b0b8c8;
-    --bronze: #cd7c3a;
-    --fd: 'Barlow Condensed', sans-serif;
-    --fb: 'Inter', sans-serif;
-  }
+:root{
+  --bg:#f5f6fa;--surface:#ffffff;--surface2:#f0f2f8;--surface3:#e8eaf2;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#111827;--muted:#6b7280;--muted2:#9ca3af;
+  --f1:#e8002d;--f1dim:rgba(232,0,45,0.1);
+  --wc:#16a34a;--wc2:#15803d;--wcdim:rgba(22,163,74,0.12);
+  --gold:#d97706;--goldbg:rgba(217,119,6,0.1);
+  --silver:#6b7280;--silverbg:rgba(107,114,128,0.1);
+  --bronze:#b45309;--bronzebg:rgba(180,83,9,0.1);
+  --win:#16a34a;--draw:#d97706;--loss:#dc2626;
+  --winbg:rgba(22,163,74,0.1);--drawbg:rgba(217,119,6,0.1);--lossbg:rgba(220,38,38,0.1);
+  --fd:'Barlow Condensed',sans-serif;--fb:'Inter',sans-serif;
+  --radius:12px;
+}
+.dark{
+  --bg:#0d0f14;--surface:#161920;--surface2:#1e2130;--surface3:#252a3a;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f2f7;--muted:rgba(240,242,247,0.5);--muted2:rgba(240,242,247,0.3);
+  --gold:#f5c842;--goldbg:rgba(245,200,66,0.12);
+  --win:#22c55e;--winbg:rgba(34,197,94,0.12);
+  --draw:#f59e0b;--drawbg:rgba(245,158,11,0.12);
+  --loss:#f87171;--lossbg:rgba(248,113,113,0.12);
+}
 
-  body { background: var(--bg); color: var(--text); font-family: var(--fb); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.6;min-height:100vh;transition:background 0.2s,color 0.2s}
 
-  .hero { padding: 28px 24px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
-  .hero-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; max-width: 1100px; margin-left: auto; margin-right: auto; }
-  .logo { font-family: var(--fd); font-size: 26px; font-weight: 800; letter-spacing: 0.06em; color: #fff; }
-  .logo span { color: var(--f1); }
-  .live-pill { background: rgba(232,0,45,0.15); color: #ff5570; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
-  .live-dot { width: 6px; height: 6px; background: var(--f1); border-radius: 50%; animation: blink 1.2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .nav-tabs { display: flex; gap: 0; max-width: 1100px; margin: 0 auto; }
-  .ntab { padding: 12px 20px; border: none; background: none; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; font-family: var(--fb); display: flex; align-items: center; gap: 7px; transition: color 0.15s; }
-  .ntab.active { color: #fff; border-bottom-color: var(--f1); }
-  .ntab.wc.active { border-bottom-color: var(--wc); }
-  .ntab svg { opacity: 0.65; }
-  .ntab.active svg { opacity: 1; }
+/* ── TOP NAV ── */
+.nav{display:flex;align-items:center;gap:0;padding:0 24px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100;height:58px}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:0.04em;color:var(--text);margin-right:auto;display:flex;align-items:center;gap:8px}
+.logo-icon{background:var(--wc);border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo span{color:var(--f1)}
+.nav-tabs{display:flex;height:58px}
+.ntab{height:58px;padding:0 18px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--fb);display:flex;align-items:center;gap:6px;transition:color 0.15s}
+.ntab.active{color:var(--text);border-bottom-color:var(--f1)}
+.ntab.wc.active{border-bottom-color:var(--wc)}
+.theme-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:15px;margin-left:12px;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.theme-btn:hover{background:var(--surface3)}
+.live-pill{background:var(--winbg);color:var(--win);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;margin-left:10px}
+.ldot{width:6px;height:6px;background:var(--win);border-radius:50%;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
-  .content { padding: 24px; max-width: 1100px; margin: 0 auto; display: none; }
-  .content.active { display: block; }
+/* ── PAGES ── */
+.page{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
 
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
-  .stat-icon { font-size: 24px; margin-bottom: 6px; }
-  .stat-val { font-family: var(--fd); font-size: 28px; font-weight: 800; color: #fff; line-height: 1; }
-  .stat-lbl { font-size: 11px; color: var(--muted2); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+/* ── F1 PAGE (same as before, compact) ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.scard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.scard-icon{font-size:22px}
+.scard-val{font-family:var(--fd);font-size:28px;font-weight:800;line-height:1;letter-spacing:-0.02em}
+.scard-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
 
-  .section-title { font-family: var(--fd); font-size: 17px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--f1); margin: 28px 0 14px; display: flex; align-items: center; gap: 9px; }
-  .section-title:first-child { margin-top: 0; }
-  .section-title.green { color: var(--wc); }
-  .section-title .sub { font-family: var(--fb); font-size: 11px; font-weight: 400; color: var(--muted2); text-transform: none; letter-spacing: 0; margin-left: auto; }
+.section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:6px}
+.section-lbl::before{content:'';width:3px;height:12px;background:var(--f1);border-radius:2px;display:inline-block}
+.section-lbl.g::before{background:var(--wc)}
 
-  .standings { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .standings thead tr { border-bottom: 1px solid var(--border); }
-  .standings th { padding: 10px 12px; font-size: 10px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; text-align: left; }
-  .standings th.r { text-align: right; }
-  .standings td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
-  .standings tr:last-child td { border: none; }
-  .standings tbody tr:hover { background: var(--surface2); }
-  .pos { width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: var(--surface2); color: var(--muted); }
-  .pos.p1 { background: rgba(245,200,66,0.15); color: var(--gold); }
-  .pos.p2 { background: rgba(176,184,200,0.12); color: var(--silver); }
-  .pos.p3 { background: rgba(205,124,58,0.15); color: var(--bronze); }
-  .tbar { display: inline-block; width: 3px; height: 18px; border-radius: 2px; margin-right: 9px; vertical-align: middle; }
-  .num { text-align: right; color: rgba(240,242,247,0.6); }
-  .pts { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--f1); text-align: right; }
-  .pts.green { color: var(--wc); }
-  .flag { font-size: 18px; margin-right: 6px; }
-  .team-cell { color: var(--muted); font-size: 12px; }
+.standings{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.standings thead tr{border-bottom:1px solid var(--border)}
+.standings th{padding:10px 12px;font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:0.07em;text-align:left}
+.standings th.r{text-align:right}
+.standings td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.standings tr:last-child td{border:none}
+.standings tbody tr:hover{background:var(--surface2)}
+.pos{width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--surface2);color:var(--muted)}
+.pos.p1{background:var(--goldbg);color:var(--gold)}
+.pos.p2{background:var(--silverbg);color:var(--silver)}
+.pos.p3{background:var(--bronzebg);color:var(--bronze)}
+.tbar{display:inline-block;width:3px;height:18px;border-radius:2px;margin-right:9px;vertical-align:middle}
+.numr{text-align:right;color:var(--muted)}
+.pts{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--f1);text-align:right}
+.pts.g{color:var(--wc)}
+.drvflag{font-size:17px;margin-right:6px}
+.tc{color:var(--muted);font-size:12px}
 
-  .race-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .race-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; transition: border-color 0.15s; }
-  .race-card:hover { border-color: var(--border2); }
-  .race-card.next { border-color: var(--f1); background: #1a0f11; }
-  .rc-round { font-size: 10px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
-  .rc-round.next { color: var(--f1); }
-  .rc-name { font-family: var(--fd); font-size: 17px; font-weight: 700; margin-bottom: 2px; line-height: 1.1; }
-  .rc-circuit { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-  .rc-date { font-size: 11px; color: rgba(240,242,247,0.55); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .rc-winner { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; display: flex; align-items: center; gap: 6px; color: rgba(240,242,247,0.7); }
-  .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-  .badge-next { background: rgba(232,0,45,0.2); color: #ff5570; }
-  .badge-done { background: rgba(255,255,255,0.07); color: var(--muted2); }
-  .badge-sched { background: rgba(26,158,92,0.18); color: #3dd68c; }
+.race-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.race-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;transition:border-color 0.15s}
+.race-card:hover{border-color:var(--border2)}
+.race-card.next{border-color:var(--f1);background:rgba(232,0,45,0.04)}
+.dark .race-card.next{background:#1a0f11}
+.rc-round{font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
+.rc-round.next{color:var(--f1)}
+.rc-name{font-family:var(--fd);font-size:17px;font-weight:700;margin-bottom:2px;line-height:1.1}
+.rc-circuit{font-size:11px;color:var(--muted);margin-bottom:8px}
+.rc-date{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rc-winner{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+.b-next{background:rgba(232,0,45,0.12);color:var(--f1)}
+.b-done{background:var(--surface2);color:var(--muted2)}
+.b-sched{background:var(--wcdim);color:var(--wc)}
 
-  .match-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .match-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; transition: border-color 0.15s; }
-  .match-card:hover { border-color: var(--border2); }
-  .match-top { font-size: 10px; color: var(--muted2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-  .match-body { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .mt { flex: 1; text-align: center; }
-  .mt-flag { font-size: 28px; display: block; margin-bottom: 4px; }
-  .mt-name { font-size: 11px; color: var(--muted); font-weight: 500; }
-  .score-box { font-family: var(--fd); font-size: 32px; font-weight: 800; display: flex; align-items: center; gap: 6px; color: #fff; }
-  .score-sep { color: rgba(240,242,247,0.25); font-size: 20px; }
-  .s-dim { color: rgba(240,242,247,0.3); }
+/* ── WC SUB-TABS ── */
+.wc-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.wc-sub-tabs{display:flex;gap:0}
+.wstab{padding:14px 16px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--fb);transition:color 0.15s}
+.wstab.active{color:var(--text);border-bottom-color:var(--wc)}
+.wc-meta{font-size:11px;color:var(--muted2);padding-bottom:14px}
 
-  .group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .group-head { background: var(--surface2); padding: 9px 14px; font-family: var(--fd); font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wc); border-bottom: 1px solid var(--border); }
-  .grow { display: grid; grid-template-columns: 1fr 26px 26px 26px 32px; padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; gap: 4px; }
-  .grow:last-child { border: none; }
-  .grow.hdr { font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 6px; }
-  .grow .n { text-align: right; color: var(--muted); }
-  .grow .gpts { text-align: right; font-weight: 700; color: var(--wc); font-family: var(--fd); font-size: 15px; }
-  .qual-bar { height: 1px; background: rgba(26,158,92,0.3); margin: 0 14px; }
-  .qual-team { font-weight: 600; }
+/* ── WC DASHBOARD ── */
+.wc-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.wcscard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.wcscard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.wcscard-icon{font-size:22px}
+.wcscard-trend{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--wcdim);color:var(--wc)}
+.wcscard-val{font-family:var(--fd);font-size:28px;font-weight:800;line-height:1}
+.wcscard-lbl{font-size:11px;color:var(--muted);margin-top:4px}
 
-  .fixtures { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0 16px; }
-  .fixture { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .fixture:last-child { border: none; }
-  .fix-teams { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
-  .fix-vs { color: var(--muted2); font-size: 11px; }
-  .fix-time { text-align: right; }
-  .fix-date { font-size: 11px; color: var(--muted2); }
-  .fix-kick { font-size: 13px; font-weight: 600; color: var(--wc); font-family: var(--fd); }
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
 
-  .loading { text-align: center; padding: 2.5rem; color: var(--muted); font-size: 13px; }
-  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--f1); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 1rem; }
-  .spinner.wc { border-top-color: var(--wc); }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error { background: rgba(232,0,45,0.08); border: 1px solid rgba(232,0,45,0.3); border-radius: 12px; padding: 14px 16px; color: #ff6b7a; font-size: 13px; margin-bottom: 12px; }
-  .setup { background: rgba(26,158,92,0.08); border: 1px solid rgba(26,158,92,0.3); border-radius: 12px; padding: 14px 16px; color: #3dd68c; font-size: 13px; margin-bottom: 16px; line-height: 1.8; }
-  .setup code { background: rgba(0,0,0,0.35); padding: 1px 6px; border-radius: 3px; font-size: 12px; }
-  .setup a { color: #5fe8a3; }
-  .sample-note { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-head{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:13px;font-weight:600}
+.panel-badge{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--wc);background:var(--wcdim);padding:2px 8px;border-radius:4px}
 
-  footer { text-align: center; padding: 2rem; color: var(--muted2); font-size: 11px; border-top: 1px solid var(--border); margin-top: 2.5rem; }
-  footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.scorer-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-top:1px solid var(--border)}
+.scorer-row:first-child{border-top:none}
+.scorer-row:hover{background:var(--surface2)}
+.scorer-left{display:flex;align-items:center;gap:10px}
+.scorer-rank{width:22px;height:22px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
+.scorer-rank.r1{background:var(--goldbg);color:var(--gold)}
+.scorer-name{font-size:13px;font-weight:600}
+.scorer-team{font-size:11px;color:var(--muted)}
+.scorer-goals{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--wc)}
 
-  @media (max-width: 720px) {
-    .hero { padding: 20px 16px 0; }
-    .content { padding: 16px; }
-    .stat-row { grid-template-columns: repeat(2,1fr); }
-    .race-grid { grid-template-columns: 1fr; }
-    .match-grid, .group-grid { grid-template-columns: 1fr; }
-    .logo { font-size: 20px; }
-    .ntab { padding: 12px 14px; }
-  }
+.bar-row{padding:9px 14px;border-top:1px solid var(--border)}
+.bar-row:first-child{border-top:none}
+.bar-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:var(--text)}
+.bar-lbl span:last-child{font-weight:700}
+.bar-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:var(--wc);border-radius:3px}
+
+/* ── WC GROUP TABLES ── */
+.groups-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.group-head{background:var(--surface2);padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.group-head-name{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--wc)}
+.group-head-info{font-size:10px;color:var(--muted2)}
+.gcol-head{display:grid;grid-template-columns:1fr 26px 26px 26px 30px;gap:4px;padding:7px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted2)}
+.gcol-head span{text-align:right}
+.gcol-head span:first-child{text-align:left}
+.grow{display:grid;grid-template-columns:1fr 26px 26px 26px 30px;gap:4px;padding:9px 14px;border-top:1px solid var(--border);align-items:center;font-size:12px;transition:background 0.1s}
+.grow:hover{background:var(--surface2)}
+.grow-team{display:flex;align-items:center;gap:7px}
+.grow-team.q{font-weight:600}
+.grow-n{text-align:right;color:var(--muted)}
+.grow-pts{text-align:right;font-weight:800;color:var(--wc);font-family:var(--fd);font-size:15px}
+.qual-line{height:1px;background:rgba(22,163,74,0.25);margin:0 14px}
+
+/* ── WC MATCH CARDS ── */
+.match-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:border-color 0.15s;cursor:default}
+.match-card:hover{border-color:rgba(22,163,74,0.35)}
+.match-top{font-size:10px;color:var(--muted2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.match-body{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.mt{flex:1;text-align:center}
+.mt-flag{font-size:28px;display:block;margin-bottom:3px}
+.mt-name{font-size:11px;color:var(--muted);font-weight:500}
+.score-box{display:flex;align-items:center;gap:6px;font-family:var(--fd);font-size:34px;font-weight:800}
+.sw{color:var(--text)}
+.sl{color:var(--muted2)}
+.ssep{font-size:20px;color:var(--border2)}
+.rpill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.rpill-ft{background:var(--surface2);color:var(--muted2)}
+.rpill-w{background:var(--winbg);color:var(--win)}
+.rpill-d{background:var(--drawbg);color:var(--draw)}
+
+/* ── WC FIXTURES ── */
+.fix-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.fix-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);transition:background 0.1s}
+.fix-row:last-child{border-bottom:none}
+.fix-row:hover{background:var(--surface2)}
+.fix-teams{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500}
+.fix-vs{font-size:10px;color:var(--muted2);font-weight:600;padding:0 2px}
+.fix-right{text-align:right}
+.fix-date{font-size:11px;color:var(--muted2)}
+.fix-time{font-size:14px;font-weight:700;color:var(--wc);font-family:var(--fd);letter-spacing:0.03em}
+
+/* ── WC SECTION PAGES ── */
+.wc-section{display:none}
+.wc-section.active{display:block}
+
+/* ── LOADING / ERROR ── */
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 1rem}
+.f1-spin{border-top-color:var(--f1)}
+.wc-spin{border-top-color:var(--wc)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:var(--radius);padding:14px 16px;color:#ef4444;font-size:13px;margin-bottom:12px}
+.setup-box{background:var(--wcdim);border:1px solid rgba(22,163,74,0.3);border-radius:var(--radius);padding:14px 16px;color:var(--wc2);font-size:13px;line-height:1.9;margin-bottom:16px}
+.dark .setup-box{color:#4ade80}
+.setup-box code{background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:3px;font-size:12px}
+.setup-box a{color:inherit;text-decoration:underline}
+.sample-note{font-size:12px;color:var(--muted);margin-bottom:12px}
+
+footer{text-align:center;padding:2rem 1rem;color:var(--muted2);font-size:11px;border-top:1px solid var(--border);margin-top:2rem}
+footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+
+@media(max-width:768px){
+  .nav{padding:0 16px}.page{padding:16px}
+  .stat-row,.wc-stat-row{grid-template-columns:repeat(2,1fr)}
+  .race-grid,.three-col{grid-template-columns:1fr}
+  .groups-grid,.two-col{grid-template-columns:1fr}
+  .logo{font-size:18px}
+  .ntab{padding:0 12px;font-size:12px}
+}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-top">
-    <div class="logo">SPORT<span>CHECK</span></div>
-    <div class="live-pill"><span class="live-dot"></span> Live data</div>
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="logo">
+    <div class="logo-icon">⚽</div>
+    SPORT<span>CHECK</span>
   </div>
   <div class="nav-tabs">
-    <button class="ntab active" id="tab-f1" onclick="showTab('f1')">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 3-6 4 10"/><circle cx="19" cy="17" r="2"/><circle cx="5" cy="17" r="2"/></svg>
+    <button class="ntab active" id="nav-f1" onclick="showPage('f1')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l4-8 4 4 3-6 4 10"/><circle cx="19" cy="17" r="2"/><circle cx="5" cy="17" r="2"/></svg>
       Formula 1
     </button>
-    <button class="ntab wc" id="tab-wc" onclick="showTab('wc')">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3c-2.5 2-4 5.5-4 9s1.5 7 4 9c2.5-2 4-5.5 4-9s-1.5-7-4-9zM3 12h18"/></svg>
+    <button class="ntab wc" id="nav-wc" onclick="showPage('wc')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3c-2.5 2-4 5.5-4 9s1.5 7 4 9c2.5-2 4-5.5 4-9s-1.5-7-4-9zM3 12h18"/></svg>
       World Cup
     </button>
   </div>
-</div>
+  <div class="live-pill"><span class="ldot"></span> Live</div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle light/dark">🌙</button>
+</nav>
 
-<!-- ===== F1 ===== -->
-<div class="content active" id="content-f1">
+<!-- ════════ F1 PAGE ════════ -->
+<div class="page active" id="page-f1">
   <div class="stat-row">
-    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val" id="f1-rounds">–</div><div class="stat-lbl">Rounds</div></div>
-    <div class="stat-card"><div class="stat-icon">🏎️</div><div class="stat-val" id="f1-drivers-count">–</div><div class="stat-lbl">Drivers</div></div>
-    <div class="stat-card"><div class="stat-icon">🏁</div><div class="stat-val" id="f1-teams-count">–</div><div class="stat-lbl">Teams</div></div>
-    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="f1-season">–</div><div class="stat-lbl">Season</div></div>
+    <div class="scard"><div class="scard-top"><span class="scard-icon">🏆</span></div><div class="scard-val" id="f1-rounds">–</div><div class="scard-lbl">Rounds</div></div>
+    <div class="scard"><div class="scard-top"><span class="scard-icon">🏎️</span></div><div class="scard-val" id="f1-dcount">–</div><div class="scard-lbl">Drivers</div></div>
+    <div class="scard"><div class="scard-top"><span class="scard-icon">🏁</span></div><div class="scard-val" id="f1-tcount">–</div><div class="scard-lbl">Teams</div></div>
+    <div class="scard"><div class="scard-top"><span class="scard-icon">📅</span></div><div class="scard-val" id="f1-season">–</div><div class="scard-lbl">Season</div></div>
   </div>
 
-  <div class="section-title">
-    <svg width="16" height="16" fill="none" stroke="#e8002d" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  <div class="section-lbl">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
     Driver standings
   </div>
-  <div id="f1-drivers"><div class="loading"><div class="spinner"></div>Fetching standings…</div></div>
+  <div id="f1-drivers"><div class="loading"><div class="spinner f1-spin"></div>Fetching standings…</div></div>
 
-  <div class="section-title">
-    <svg width="16" height="16" fill="none" stroke="#e8002d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  <div class="section-lbl">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Constructor standings
   </div>
-  <div id="f1-constructors"><div class="loading"><div class="spinner"></div>Fetching constructors…</div></div>
+  <div id="f1-constructors"><div class="loading"><div class="spinner f1-spin"></div>Fetching constructors…</div></div>
 
-  <div class="section-title">
-    <svg width="16" height="16" fill="none" stroke="#e8002d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+  <div class="section-lbl">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
     Race calendar
-    <span class="sub" id="f1-next-label"></span>
+    <span style="font-family:var(--fb);font-size:11px;font-weight:400;color:var(--muted2);text-transform:none;letter-spacing:0;margin-left:auto" id="f1-next-lbl"></span>
   </div>
-  <div id="f1-schedule"><div class="loading"><div class="spinner"></div>Fetching schedule…</div></div>
+  <div id="f1-schedule"><div class="loading"><div class="spinner f1-spin"></div>Fetching schedule…</div></div>
 </div>
 
-<!-- ===== WORLD CUP ===== -->
-<div class="content" id="content-wc">
-  <div class="stat-row">
-    <div class="stat-card"><div class="stat-icon">🌍</div><div class="stat-val">48</div><div class="stat-lbl">Teams</div></div>
-    <div class="stat-card"><div class="stat-icon">⚽</div><div class="stat-val">104</div><div class="stat-lbl">Matches</div></div>
-    <div class="stat-card"><div class="stat-icon">🏟️</div><div class="stat-val">16</div><div class="stat-lbl">Venues</div></div>
-    <div class="stat-card"><div class="stat-icon">🇺🇸</div><div class="stat-val">2026</div><div class="stat-lbl">USA·CAN·MEX</div></div>
+<!-- ════════ WORLD CUP PAGE ════════ -->
+<div class="page" id="page-wc">
+  <!-- WC sub-nav -->
+  <div class="wc-header" style="margin:-24px -24px 24px;padding:0 24px">
+    <div class="wc-sub-tabs">
+      <button class="wstab active" onclick="wcTab(this,'overview')">Overview</button>
+      <button class="wstab" onclick="wcTab(this,'groups')">Groups</button>
+      <button class="wstab" onclick="wcTab(this,'results')">Results</button>
+      <button class="wstab" onclick="wcTab(this,'fixtures')">Fixtures</button>
+    </div>
+    <div class="wc-meta">FIFA World Cup 2026 · USA · Canada · Mexico</div>
   </div>
 
-  <div class="section-title green">
-    <svg width="16" height="16" fill="none" stroke="#1a9e5c" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-    Group standings
-  </div>
-  <div id="wc-groups"><div class="loading"><div class="spinner wc"></div>Fetching groups…</div></div>
+  <!-- OVERVIEW -->
+  <div class="wc-section active" id="wc-overview">
+    <div class="wc-stat-row">
+      <div class="wcscard"><div class="wcscard-top"><span class="wcscard-icon">🌍</span><span class="wcscard-trend">48 teams</span></div><div class="wcscard-val" id="wc-goals">–</div><div class="wcscard-lbl">Goals scored</div></div>
+      <div class="wcscard"><div class="wcscard-top"><span class="wcscard-icon">⚽</span></div><div class="wcscard-val" id="wc-played">–</div><div class="wcscard-lbl">Matches played</div></div>
+      <div class="wcscard"><div class="wcscard-top"><span class="wcscard-icon">🥅</span></div><div class="wcscard-val" id="wc-gpg">–</div><div class="wcscard-lbl">Goals per match</div></div>
+      <div class="wcscard"><div class="wcscard-top"><span class="wcscard-icon">🏟️</span></div><div class="wcscard-val">16</div><div class="wcscard-lbl">Venues</div></div>
+    </div>
 
-  <div class="section-title green">
-    <svg width="16" height="16" fill="none" stroke="#1a9e5c" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-    Recent results
-  </div>
-  <div id="wc-results"><div class="loading"><div class="spinner wc"></div>Fetching results…</div></div>
+    <div class="two-col">
+      <div>
+        <div class="section-lbl g">Top scorers</div>
+        <div id="wc-scorers"><div class="loading"><div class="spinner wc-spin"></div>Loading…</div></div>
+      </div>
+      <div>
+        <div class="section-lbl g">Goals by group</div>
+        <div id="wc-goals-chart"><div class="loading"><div class="spinner wc-spin"></div>Loading…</div></div>
+      </div>
+    </div>
 
-  <div class="section-title green">
-    <svg width="16" height="16" fill="none" stroke="#1a9e5c" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
-    Upcoming fixtures
+    <div class="section-lbl g">Latest results</div>
+    <div id="wc-overview-results"><div class="loading"><div class="spinner wc-spin"></div>Loading…</div></div>
   </div>
-  <div id="wc-fixtures"><div class="loading"><div class="spinner wc"></div>Fetching fixtures…</div></div>
+
+  <!-- GROUPS -->
+  <div class="wc-section" id="wc-groups">
+    <div id="wc-groups-inner"><div class="loading"><div class="spinner wc-spin"></div>Fetching groups…</div></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="wc-section" id="wc-results">
+    <div id="wc-results-inner"><div class="loading"><div class="spinner wc-spin"></div>Fetching results…</div></div>
+  </div>
+
+  <!-- FIXTURES -->
+  <div class="wc-section" id="wc-fixtures">
+    <div id="wc-fixtures-inner"><div class="loading"><div class="spinner wc-spin"></div>Fetching fixtures…</div></div>
+  </div>
 </div>
 
 <footer>
-  F1 data via <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1 API</a> ·
+  F1 via <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1 API</a> ·
   World Cup via <a href="https://www.football-data.org/" target="_blank">football-data.org</a> ·
-  Built with GitHub Pages
+  Hosted on GitHub Pages
 </footer>
 
 <script>
-function showTab(name) {
-  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
-  document.getElementById('content-' + name).classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
+// ── THEME ──────────────────────────────────────────────────────────────
+const saved = localStorage.getItem('theme');
+if(saved==='dark'||(!saved&&matchMedia('(prefers-color-scheme:dark)').matches)){
+  document.documentElement.classList.add('dark');
+  document.getElementById('themeBtn').textContent='☀️';
+}
+function toggleTheme(){
+  const dark=document.documentElement.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';
+  localStorage.setItem('theme',dark?'dark':'light');
 }
 
-const teamColors = {
+// ── PAGE ROUTING ───────────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+}
+
+// ── WC SUB-TABS ────────────────────────────────────────────────────────
+function wcTab(btn,name){
+  document.querySelectorAll('.wstab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.wc-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('wc-'+name).classList.add('active');
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────
+const tcol={
   'Red Bull':'#3671C6','Mercedes':'#27F4D2','Ferrari':'#E8002D','McLaren':'#FF8000',
-  'Aston Martin':'#229971','Alpine':'#FF87BC','Williams':'#64C4FF','RB':'#6692FF',
-  'Racing Bulls':'#6692FF','Sauber':'#52E252','Kick Sauber':'#52E252','Haas':'#B6BABD','Audi':'#52E252'
+  'Aston Martin':'#229971','Alpine':'#FF87BC','Williams':'#64C4FF',
+  'RB':'#6692FF','Racing Bulls':'#6692FF','Sauber':'#52E252',
+  'Kick Sauber':'#52E252','Haas':'#B6BABD','Audi':'#52E252'
 };
-function teamColor(name){ if(!name) return '#888'; for(const k in teamColors){ if(name.includes(k)) return teamColors[k]; } return '#888'; }
+function tcolor(n){if(!n)return'#888';for(const k in tcol)if(n.includes(k))return tcol[k];return'#888'}
 
-const natFlags = {British:'GB',Dutch:'NL',Monegasque:'MC',Spanish:'ES',Mexican:'MX',Australian:'AU',
-  Canadian:'CA',Finnish:'FI',German:'DE',French:'FR',Thai:'TH',Japanese:'JP',Danish:'DK',Chinese:'CN',
-  American:'US',Italian:'IT',Brazilian:'BR',Argentine:'AR',Austrian:'AT','New Zealander':'NZ'};
-function natFlag(nat){ return flagEmoji(natFlags[nat] || '??'); }
-function flagEmoji(code){ if(!code||code.length!==2) return '🏳'; const o=127397; return [...code.toUpperCase()].map(c=>String.fromCodePoint(c.charCodeAt(0)+o)).join(''); }
+const nflg={British:'GB',Dutch:'NL',Monegasque:'MC',Spanish:'ES',Mexican:'MX',
+  Australian:'AU',Canadian:'CA',Finnish:'FI',German:'DE',French:'FR',Thai:'TH',
+  Japanese:'JP',Danish:'DK',Chinese:'CN',American:'US',Italian:'IT',
+  Brazilian:'BR',Argentine:'AR',Austrian:'AT','New Zealander':'NZ'};
+function flagOf(code){if(!code||code.length!==2)return'🏳';const o=127397;return[...code.toUpperCase()].map(c=>String.fromCodePoint(c.charCodeAt(0)+o)).join('')}
+function natFlag(nat){return flagOf(nflg[nat]||'??')}
 
-const teamEmoji = {USA:'🇺🇸',Mexico:'🇲🇽',Brazil:'🇧🇷',Argentina:'🇦🇷',France:'🇫🇷',Germany:'🇩🇪',
-  Spain:'🇪🇸',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Japan:'🇯🇵',Morocco:'🇲🇦',Croatia:'🇭🇷',Denmark:'🇩🇰',Portugal:'🇵🇹',
-  Netherlands:'🇳🇱',Italy:'🇮🇹',Serbia:'🇷🇸',Chile:'🇨🇱',Ecuador:'🇪🇨',Panama:'🇵🇦',Bolivia:'🇧🇴',
-  Canada:'🇨🇦',Thailand:'🇹🇭',Belgium:'🇧🇪',Uruguay:'🇺🇾',Colombia:'🇨🇴',Senegal:'🇸🇳'};
-function teamFlag(name){ return teamEmoji[name] || '🏳'; }
+const ctryCode={
+  'Australia':'AU','Austria':'AT','Azerbaijan':'AZ','Bahrain':'BH','Belgium':'BE',
+  'Brazil':'BR','Canada':'CA','China':'CN','France':'FR','Germany':'DE',
+  'Hungary':'HU','Italy':'IT','Japan':'JP','Mexico':'MX','Monaco':'MC',
+  'Netherlands':'NL','Portugal':'PT','Qatar':'QA','Saudi Arabia':'SA',
+  'Singapore':'SG','Spain':'ES','UK':'GB','United Kingdom':'GB',
+  'United States':'US','USA':'US','United Arab Emirates':'AE',
+  'Argentina':'AR','Denmark':'DK','Finland':'FI','Sweden':'SE',
+  'Switzerland':'CH','Thailand':'TH','New Zealand':'NZ','South Africa':'ZA',
+  'Morocco':'MA','Nigeria':'NG','Senegal':'SN','South Korea':'KR',
+  'Colombia':'CO','Uruguay':'UY','Chile':'CL','Ecuador':'EC','Panama':'PA',
+  'Bolivia':'BO','Croatia':'HR','Serbia':'RS','Romania':'RO','Greece':'GR',
+  'Turkey':'TR','Ireland':'IE','Norway':'NO','Iceland':'IS','Russia':'RU'
+};
+function ctryFlag(name){if(!name)return'';const c=ctryCode[name];return c?flagOf(c)+'\u202f':''}
 
-function fDate(s){ return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
-function fDateShort(s){ return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
-function fTime(s){ return new Date(s).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
-function posBadge(p){ const c=p==1?'p1':p==2?'p2':p==3?'p3':''; return `<span class="pos ${c}">${p}</span>`; }
+const tEmoji={USA:'🇺🇸',Mexico:'🇲🇽',Brazil:'🇧🇷',Argentina:'🇦🇷',France:'🇫🇷',
+  Germany:'🇩🇪',Spain:'🇪🇸',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Japan:'🇯🇵',Morocco:'🇲🇦',Croatia:'🇭🇷',
+  Denmark:'🇩🇰',Portugal:'🇵🇹',Netherlands:'🇳🇱',Italy:'🇮🇹',Serbia:'🇷🇸',
+  Chile:'🇨🇱',Ecuador:'🇪🇨',Panama:'🇵🇦',Bolivia:'🇧🇴',Canada:'🇨🇦',
+  Belgium:'🇧🇪',Uruguay:'🇺🇾',Colombia:'🇨🇴',Senegal:'🇸🇳',Thailand:'🇹🇭'};
+function tf(n){return tEmoji[n]||'🏳'}
 
-const F1 = 'https://api.jolpi.ca/ergast/f1/current';
+function fDate(s){return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+function fShort(s){return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function fTime(s){return new Date(s).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+function posBadge(p){const c=p==1?'p1':p==2?'p2':p==3?'p3':'';return`<span class="pos ${c}">${p}</span>`}
 
-async function loadF1(){ await Promise.all([f1Drivers(), f1Constructors(), f1Schedule()]); }
+// ── F1 API (Jolpica) ──────────────────────────────────────────────────
+const F1='https://api.jolpi.ca/ergast/f1/current';
+async function loadF1(){await Promise.all([f1Drivers(),f1Constructors(),f1Schedule()])}
 
 async function f1Drivers(){
-  const el = document.getElementById('f1-drivers');
+  const el=document.getElementById('f1-drivers');
   try{
-    const j = await (await fetch(`${F1}/driverstandings.json`)).json();
-    const list = j.MRData.StandingsTable.StandingsLists[0];
-    document.getElementById('f1-season').textContent = j.MRData.StandingsTable.season;
-    const s = list?.DriverStandings || [];
-    document.getElementById('f1-drivers-count').textContent = s.length || '–';
-    if(!s.length){ el.innerHTML = '<div class="error">No standings yet for this season.</div>'; return; }
-    const rows = s.map(d=>{
-      const dr=d.Driver, c=d.Constructors[0], clr=teamColor(c?.name);
-      return `<tr><td>${posBadge(d.position)}</td>
-        <td><span class="tbar" style="background:${clr}"></span><span class="flag">${natFlag(dr.nationality)}</span>${dr.givenName} <strong>${dr.familyName}</strong></td>
-        <td class="team-cell">${c?.name||''}</td>
-        <td class="num">${d.wins}</td><td class="pts">${d.points}</td></tr>`;
+    const j=await(await fetch(`${F1}/driverstandings.json`)).json();
+    const list=j.MRData.StandingsTable.StandingsLists[0];
+    document.getElementById('f1-season').textContent=j.MRData.StandingsTable.season||'–';
+    const s=list?.DriverStandings||[];
+    document.getElementById('f1-dcount').textContent=s.length||'–';
+    if(!s.length){el.innerHTML='<div class="err">No standings yet for this season.</div>';return}
+    const rows=s.map(d=>{
+      const dr=d.Driver,c=d.Constructors[0],clr=tcolor(c?.name);
+      return`<tr><td>${posBadge(d.position)}</td>
+        <td><span class="tbar" style="background:${clr}"></span><span class="drvflag">${natFlag(dr.nationality)}</span>${dr.givenName} <strong>${dr.familyName}</strong></td>
+        <td class="tc">${c?.name||''}</td>
+        <td class="numr">${d.wins}</td><td class="pts">${d.points}</td></tr>`;
     }).join('');
-    el.innerHTML = `<table class="standings"><thead><tr><th style="width:40px">Pos</th><th>Driver</th><th>Team</th><th class="r">Wins</th><th class="r">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
-  }catch(e){ el.innerHTML = `<div class="error">Could not load driver standings. ${e.message}</div>`; }
+    el.innerHTML=`<table class="standings"><thead><tr><th style="width:40px">Pos</th><th>Driver</th><th>Team</th><th class="r">Wins</th><th class="r">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){el.innerHTML=`<div class="err">Could not load driver standings. ${e.message}</div>`}
 }
-
 async function f1Constructors(){
-  const el = document.getElementById('f1-constructors');
+  const el=document.getElementById('f1-constructors');
   try{
-    const j = await (await fetch(`${F1}/constructorstandings.json`)).json();
-    const s = j.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || [];
-    document.getElementById('f1-teams-count').textContent = s.length || '–';
-    if(!s.length){ el.innerHTML = '<div class="error">No constructor standings yet.</div>'; return; }
-    const rows = s.map(c=>{
-      const ct=c.Constructor, clr=teamColor(ct.name);
-      return `<tr><td>${posBadge(c.position)}</td>
+    const j=await(await fetch(`${F1}/constructorstandings.json`)).json();
+    const s=j.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings||[];
+    document.getElementById('f1-tcount').textContent=s.length||'–';
+    if(!s.length){el.innerHTML='<div class="err">No constructor standings yet.</div>';return}
+    const rows=s.map(c=>{
+      const ct=c.Constructor,clr=tcolor(ct.name);
+      return`<tr><td>${posBadge(c.position)}</td>
         <td><span class="tbar" style="background:${clr}"></span><strong>${ct.name}</strong></td>
-        <td class="team-cell">${flagEmoji(natFlags[ct.nationality]||'')} ${ct.nationality}</td>
-        <td class="num">${c.wins}</td><td class="pts">${c.points}</td></tr>`;
+        <td class="tc">${natFlag(ct.nationality)} ${ct.nationality}</td>
+        <td class="numr">${c.wins}</td><td class="pts">${c.points}</td></tr>`;
     }).join('');
-    el.innerHTML = `<table class="standings"><thead><tr><th style="width:40px">Pos</th><th>Constructor</th><th>Country</th><th class="r">Wins</th><th class="r">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
-  }catch(e){ el.innerHTML = `<div class="error">Could not load constructor standings. ${e.message}</div>`; }
+    el.innerHTML=`<table class="standings"><thead><tr><th style="width:40px">Pos</th><th>Constructor</th><th>Country</th><th class="r">Wins</th><th class="r">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){el.innerHTML=`<div class="err">Could not load constructor standings. ${e.message}</div>`}
 }
-
 async function f1Schedule(){
-  const el = document.getElementById('f1-schedule');
+  const el=document.getElementById('f1-schedule');
   try{
-    const [sj, rj] = await Promise.all([
+    const[sj,rj]=await Promise.all([
       (await fetch(`${F1}/races.json`)).json(),
       (await fetch(`${F1}/results/1.json`)).json()
     ]);
-    const races = sj.MRData.RaceTable.Races;
-    document.getElementById('f1-rounds').textContent = races.length || '–';
-    const resMap = {};
-    rj.MRData.RaceTable.Races.forEach(r=>{ resMap[r.round]=r.Results?.[0]; });
-    const now = new Date();
-    let nextIdx = races.findIndex(r=> new Date(r.date) > now);
-    const next = races[nextIdx];
-    if(next) document.getElementById('f1-next-label').textContent = `Next: ${next.raceName}`;
-    const cards = races.map((r,i)=>{
-      const past = new Date(r.date) < now;
-      const isNext = i===nextIdx;
-      const w = resMap[r.round];
-      const badge = isNext?'<span class="badge badge-next">Up next</span>':past?'<span class="badge badge-done">Done</span>':'<span class="badge badge-sched">Scheduled</span>';
-      const winner = w?`<div class="rc-winner">🥇 <strong>${w.Driver.familyName}</strong> — ${w.Constructor.name}</div>`:'';
-      return `<div class="race-card ${isNext?'next':''}">
-        <div class="rc-round ${isNext?'next':''}">Round ${r.round} · ${r.Circuit.Location.country}</div>
+    const races=sj.MRData.RaceTable.Races;
+    document.getElementById('f1-rounds').textContent=races.length||'–';
+    const rmap={};rj.MRData.RaceTable.Races.forEach(r=>{rmap[r.round]=r.Results?.[0]});
+    const now=new Date();
+    const ni=races.findIndex(r=>new Date(r.date)>now);
+    if(races[ni])document.getElementById('f1-next-lbl').textContent=`Next: ${races[ni].raceName}`;
+    const cards=races.map((r,i)=>{
+      const past=new Date(r.date)<now,isNext=i===ni,w=rmap[r.round];
+      const b=isNext?'<span class="badge b-next">Up next</span>':past?'<span class="badge b-done">Done</span>':'<span class="badge b-sched">Scheduled</span>';
+      const win=w?`<div class="rc-winner">🥇 <strong>${w.Driver.familyName}</strong> — ${w.Constructor.name}</div>`:'';
+      return`<div class="race-card ${isNext?'next':''}">
+        <div class="rc-round ${isNext?'next':''}">Round ${r.round} · ${ctryFlag(r.Circuit.Location.country)}${r.Circuit.Location.country}</div>
         <div class="rc-name">${r.raceName}</div>
-        <div class="rc-circuit">${r.Circuit.circuitName}</div>
-        <div class="rc-date">📅 ${fDate(r.date)} ${badge}</div>
-        ${winner}</div>`;
+        <div class="rc-circuit">${r.Circuit.circuitName} · ${ctryFlag(r.Circuit.Location.country)}${r.Circuit.Location.locality}</div>
+        <div class="rc-date">📅 ${fDate(r.date)} ${b}</div>
+        ${win}</div>`;
     }).join('');
-    el.innerHTML = `<div class="race-grid">${cards}</div>`;
-  }catch(e){ el.innerHTML = `<div class="error">Could not load schedule. ${e.message}</div>`; }
+    el.innerHTML=`<div class="race-grid">${cards}</div>`;
+  }catch(e){el.innerHTML=`<div class="err">Could not load schedule. ${e.message}</div>`}
 }
 
-const FD_KEY = '421b5fcbaf784303b99450ea738c54a9';
-const WC = 'https://api.football-data.org/v4/competitions/2000';
+// ── WORLD CUP (football-data.org) ─────────────────────────────────────
+// Get free key at: https://www.football-data.org/client/register
+// Replace YOUR_API_KEY below with your actual key
+const FD_KEY='421b5fcbaf784303b99450ea738c54a9';
+const WC_BASE='https://api.football-data.org/v4/competitions/2000';
 
-async function fd(path){
-  const r = await fetch(WC+path, { headers:{'X-Auth-Token':FD_KEY} });
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+async function fdFetch(path){
+  const r=await fetch(WC_BASE+path,{headers:{'X-Auth-Token':FD_KEY}});
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
 
 async function loadWC(){
-  if(FD_KEY === 'YOUR_API_KEY'){ wcDemo(); return; }
-  await Promise.all([wcGroups(), wcResults(), wcFixtures()]);
+  if(FD_KEY==='YOUR_API_KEY'){wcDemo();return}
+  try{
+    const[standings,matches]=await Promise.all([
+      fdFetch('/standings'),
+      fdFetch('/matches')
+    ]);
+    const finished=(matches.matches||[]).filter(m=>m.status==='FINISHED');
+    const scheduled=(matches.matches||[]).filter(m=>m.status==='SCHEDULED'||m.status==='TIMED');
+    const goals=finished.reduce((a,m)=>a+(m.score.fullTime.home||0)+(m.score.fullTime.away||0),0);
+    document.getElementById('wc-goals').textContent=goals;
+    document.getElementById('wc-played').textContent=finished.length;
+    document.getElementById('wc-gpg').textContent=finished.length?+(goals/finished.length).toFixed(1):0;
+    buildScorers(finished);
+    buildGoalsChart(finished);
+    buildOverviewResults(finished.slice(-3).reverse());
+    buildGroups(standings);
+    buildResults(finished.slice(-9).reverse());
+    buildFixtures(scheduled.slice(0,10));
+  }catch(e){
+    const msg=`<div class="err">Could not load data: ${e.message}</div>`;
+    ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
+      .forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=msg});
+  }
 }
 
-async function wcGroups(){
-  const el = document.getElementById('wc-groups');
-  try{
-    const j = await fd('/standings');
-    const groups = (j.standings||[]).filter(s=>s.type==='TOTAL' && s.group);
-    if(!groups.length){ el.innerHTML='<div class="error">Group stage not available yet.</div>'; return; }
-    el.innerHTML = `<div class="group-grid">${groups.map(g=>groupCard(g.group, g.table.map(t=>({
-      name:t.team.shortName||t.team.name, p:t.playedGames, w:t.won, l:t.lost, pts:t.points
-    })))).join('')}</div>`;
-  }catch(e){ el.innerHTML = `<div class="error">Could not load groups. ${e.message}</div>`; }
-}
-async function wcResults(){
-  const el = document.getElementById('wc-results');
-  try{
-    const j = await fd('/matches?status=FINISHED');
-    const m = (j.matches||[]).slice(-8).reverse();
-    if(!m.length){ el.innerHTML='<div class="error">No results yet.</div>'; return; }
-    el.innerHTML = `<div class="match-grid">${m.map(x=>matchCard(
-      x.group||'', fDateShort(x.utcDate),
-      x.homeTeam.shortName||x.homeTeam.name, x.awayTeam.shortName||x.awayTeam.name,
-      x.score.fullTime.home, x.score.fullTime.away
-    )).join('')}</div>`;
-  }catch(e){ el.innerHTML = `<div class="error">Could not load results. ${e.message}</div>`; }
-}
-async function wcFixtures(){
-  const el = document.getElementById('wc-fixtures');
-  try{
-    const j = await fd('/matches?status=SCHEDULED');
-    const m = (j.matches||[]).slice(0,8);
-    if(!m.length){ el.innerHTML='<div class="error">No upcoming fixtures.</div>'; return; }
-    el.innerHTML = `<div class="fixtures">${m.map(x=>fixtureRow(
-      x.homeTeam.shortName||x.homeTeam.name, x.awayTeam.shortName||x.awayTeam.name,
-      fDateShort(x.utcDate), fTime(x.utcDate), x.group||''
-    )).join('')}</div>`;
-  }catch(e){ el.innerHTML = `<div class="error">Could not load fixtures. ${e.message}</div>`; }
+function buildScorers(matches){
+  const el=document.getElementById('wc-scorers');
+  const counts={};
+  matches.forEach(m=>{
+    (m.goals||[]).forEach(g=>{
+      if(!g.scorer)return;
+      const k=g.scorer.name;
+      if(!counts[k])counts[k]={name:k,team:m.homeTeam.name,goals:0};
+      counts[k].goals++;
+    });
+  });
+  const sorted=Object.values(counts).sort((a,b)=>b.goals-a.goals).slice(0,5);
+  if(!sorted.length){
+    el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">Scorer data not available yet</div>';return;
+  }
+  const rows=sorted.map((s,i)=>`
+    <div class="scorer-row">
+      <div class="scorer-left">
+        <div class="scorer-rank ${i===0?'r1':''}">${i+1}</div>
+        <div><div class="scorer-name">${tf(s.team)} ${s.name}</div><div class="scorer-team">${s.team}</div></div>
+      </div>
+      <div class="scorer-goals">${s.goals} ⚽</div>
+    </div>`).join('');
+  el.innerHTML=`<div class="panel">${rows}</div>`;
 }
 
-function groupCard(name, teams){
-  const rows = teams.map((t,i)=>(i===2?'<div class="qual-bar"></div>':'')+
-    `<div class="grow"><span>${teamFlag(t.name)} <span class="${i<2?'qual-team':''}">${t.name}</span></span><span class="n">${t.p}</span><span class="n">${t.w}</span><span class="n">${t.l}</span><span class="gpts">${t.pts}</span></div>`).join('');
-  return `<div class="group-card"><div class="group-head">${name}</div>
-    <div class="grow hdr"><span>Team</span><span class="n">P</span><span class="n">W</span><span class="n">L</span><span class="gpts">Pts</span></div>${rows}</div>`;
+function buildGoalsChart(matches){
+  const el=document.getElementById('wc-goals-chart');
+  const gmap={};
+  matches.forEach(m=>{
+    const g=(m.score.fullTime.home||0)+(m.score.fullTime.away||0);
+    const grp=m.group||'Other';
+    gmap[grp]=(gmap[grp]||0)+g;
+  });
+  const entries=Object.entries(gmap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(!entries.length){el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goal data yet</div>';return}
+  const max=Math.max(...entries.map(e=>e[1]));
+  const rows=entries.map(([grp,g])=>`
+    <div class="bar-row">
+      <div class="bar-lbl"><span>${grp}</span><span>${g}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(g/max*100)}%"></div></div>
+    </div>`).join('');
+  el.innerHTML=`<div class="panel">${rows}</div>`;
 }
-function matchCard(group, date, home, away, hs, as){
-  const hw=hs>as, aw=as>hs;
-  return `<div class="match-card"><div class="match-top"><span>${group} · ${date}</span><span class="badge badge-done">FT</span></div>
+
+function buildOverviewResults(matches){
+  const el=document.getElementById('wc-overview-results');
+  if(!matches.length){el.innerHTML='<div class="err">No results yet</div>';return}
+  el.innerHTML=`<div class="three-col">${matches.map(m=>matchCard(m)).join('')}</div>`;
+}
+
+function buildGroups(standings){
+  const el=document.getElementById('wc-groups-inner');
+  const groups=(standings.standings||[]).filter(s=>s.type==='TOTAL'&&s.group);
+  if(!groups.length){el.innerHTML='<div class="err">Group stage not yet available</div>';return}
+  const cards=groups.map(g=>{
+    const rows=g.table.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
+      `<div class="grow"><div class="grow-team ${i<2?'q':''}">${tf(t.team.name)} ${t.team.shortName||t.team.name}</div>
+       <span class="grow-n">${t.playedGames}</span><span class="grow-n">${t.won}</span><span class="grow-n">${t.lost}</span><span class="grow-pts">${t.points}</span></div>`
+    ).join('');
+    return`<div class="group-card">
+      <div class="group-head"><span class="group-head-name">${g.group}</span><span class="group-head-info">${g.table[0]?.playedGames||0} of 3 played</span></div>
+      <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>
+      ${rows}</div>`;
+  }).join('');
+  el.innerHTML=`<div class="groups-grid">${cards}</div>`;
+}
+
+function buildResults(matches){
+  const el=document.getElementById('wc-results-inner');
+  if(!matches.length){el.innerHTML='<div class="err">No results yet</div>';return}
+  el.innerHTML=`<div class="three-col">${matches.map(m=>matchCard(m)).join('')}</div>`;
+}
+
+function buildFixtures(matches){
+  const el=document.getElementById('wc-fixtures-inner');
+  if(!matches.length){el.innerHTML='<div class="err">No upcoming fixtures</div>';return}
+  const rows=matches.map(m=>`
+    <div class="fix-row">
+      <div class="fix-teams">${tf(m.homeTeam.name)} <span>${tf(m.homeTeam.name)} ${m.homeTeam.shortName||m.homeTeam.name}</span>
+        <span class="fix-vs">vs</span>
+        ${tf(m.awayTeam.name)} <span>${tf(m.awayTeam.name)} ${m.awayTeam.shortName||m.awayTeam.name}</span></div>
+      <div class="fix-right"><div class="fix-date">${fShort(m.utcDate)} · ${m.group||''}</div><div class="fix-time">${fTime(m.utcDate)}</div></div>
+    </div>`).join('');
+  el.innerHTML=`<div class="fix-panel">${rows}</div>`;
+}
+
+function matchCard(m){
+  const hs=m.score.fullTime.home,as=m.score.fullTime.away;
+  const hw=hs>as,aw=as>hs,draw=hs===as;
+  const pill=draw?'<span class="rpill rpill-d">Draw</span>':'<span class="rpill rpill-ft">FT</span>';
+  return`<div class="match-card">
+    <div class="match-top"><span>${m.group||''} · ${fShort(m.utcDate)}</span>${pill}</div>
     <div class="match-body">
-      <div class="mt"><span class="mt-flag">${teamFlag(home)}</span><span class="mt-name">${home}</span></div>
-      <div class="score-box"><span class="${hw?'':'s-dim'}">${hs}</span><span class="score-sep">–</span><span class="${aw?'':'s-dim'}">${as}</span></div>
-      <div class="mt"><span class="mt-flag">${teamFlag(away)}</span><span class="mt-name">${away}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(m.homeTeam.name)}</span><span class="mt-name">${tf(m.homeTeam.name)} ${m.homeTeam.shortName||m.homeTeam.name}</span></div>
+      <div class="score-box"><span class="${hw?'sw':'sl'}">${hs}</span><span class="ssep">–</span><span class="${aw?'sw':'sl'}">${as}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(m.awayTeam.name)}</span><span class="mt-name">${tf(m.awayTeam.name)} ${m.awayTeam.shortName||m.awayTeam.name}</span></div>
     </div></div>`;
 }
-function fixtureRow(home, away, date, time, group){
-  return `<div class="fixture">
-    <div class="fix-teams">${teamFlag(home)} <span>${home}</span><span class="fix-vs">vs</span>${teamFlag(away)} <span>${away}</span></div>
-    <div class="fix-time"><div class="fix-date">${date} · ${group}</div><div class="fix-kick">${time}</div></div></div>`;
-}
 
+// ── DEMO MODE (no API key) ─────────────────────────────────────────────
 function wcDemo(){
-  document.getElementById('wc-groups').innerHTML =
-    `<div class="setup"><strong>Setup needed for live data:</strong><br>
-     1. Get a free key at <a href="https://www.football-data.org/client/register" target="_blank">football-data.org</a><br>
-     2. In <code>index.html</code>, replace <code>YOUR_API_KEY</code> with your key<br>
-     3. Refresh — real groups, results &amp; fixtures appear here</div>
-     <p class="sample-note">Showing sample data below ↓</p>
-     <div class="group-grid">
-       ${groupCard('Group A',[{name:'USA',p:2,w:2,l:0,pts:6},{name:'Mexico',p:2,w:1,l:1,pts:3},{name:'Panama',p:2,w:0,l:1,pts:1},{name:'Bolivia',p:2,w:0,l:2,pts:0}])}
-       ${groupCard('Group B',[{name:'Spain',p:2,w:2,l:0,pts:6},{name:'Croatia',p:2,w:1,l:1,pts:3},{name:'Morocco',p:2,w:0,l:1,pts:1},{name:'Japan',p:2,w:0,l:2,pts:0}])}
-       ${groupCard('Group C',[{name:'Brazil',p:2,w:2,l:0,pts:6},{name:'Germany',p:2,w:1,l:1,pts:3},{name:'Serbia',p:2,w:0,l:1,pts:1},{name:'Chile',p:2,w:0,l:2,pts:0}])}
-       ${groupCard('Group D',[{name:'France',p:2,w:1,l:0,pts:4},{name:'Argentina',p:2,w:1,l:0,pts:4},{name:'Denmark',p:2,w:0,l:1,pts:1},{name:'Ecuador',p:2,w:0,l:1,pts:1}])}
-     </div>`;
-  document.getElementById('wc-results').innerHTML =
-    `<div class="match-grid">
-      ${matchCard('Group A','Jun 14','USA','Mexico',2,1)}
-      ${matchCard('Group B','Jun 15','Spain','Morocco',1,1)}
-      ${matchCard('Group C','Jun 14','Brazil','Chile',3,0)}
-      ${matchCard('Group D','Jun 15','France','Ecuador',2,0)}
-    </div>`;
-  document.getElementById('wc-fixtures').innerHTML =
-    `<div class="fixtures">
-      ${fixtureRow('Japan','Croatia','Jun 17','18:00','Group B')}
-      ${fixtureRow('Panama','Bolivia','Jun 17','21:00','Group A')}
-      ${fixtureRow('Brazil','Serbia','Jun 18','18:00','Group C')}
-      ${fixtureRow('Argentina','Ecuador','Jun 19','21:00','Group D')}
-    </div>`;
+  document.getElementById('wc-goals').textContent='58';
+  document.getElementById('wc-played').textContent='24';
+  document.getElementById('wc-gpg').textContent='2.4';
+
+  document.getElementById('wc-scorers').innerHTML=`<div class="panel">
+    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank r1">1</div><div><div class="scorer-name">🇧🇷 R. Endrick</div><div class="scorer-team">Brazil</div></div></div><div class="scorer-goals">5 ⚽</div></div>
+    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">2</div><div><div class="scorer-name">🇫🇷 K. Mbappé</div><div class="scorer-info-team">France</div></div></div><div class="scorer-goals">4 ⚽</div></div>
+    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">3</div><div><div class="scorer-name">🇦🇷 L. Messi</div><div class="scorer-team">Argentina</div></div></div><div class="scorer-goals">3 ⚽</div></div>
+    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">4</div><div><div class="scorer-name">🇵🇹 R. Leão</div><div class="scorer-team">Portugal</div></div></div><div class="scorer-goals">3 ⚽</div></div>
+    <div class="scorer-row"><div class="scorer-left"><div class="scorer-rank">5</div><div><div class="scorer-name">🇩🇪 J. Wirtz</div><div class="scorer-team">Germany</div></div></div><div class="scorer-goals">2 ⚽</div></div>
+  </div>`;
+
+  document.getElementById('wc-goals-chart').innerHTML=`<div class="panel">
+    ${[['🇫🇷 Group D',8,73],['🇺🇸 Group A',9,82],['🇧🇷 Group C',11,100],['🇪🇸 Group B',7,64],['🇩🇪 Group E',6,55],['🇯🇵 Group F',5,45]].map(([g,n,w])=>`
+    <div class="bar-row"><div class="bar-lbl"><span>${g}</span><span>${n}</span></div><div class="bar-track"><div class="bar-fill" style="width:${w}%"></div></div></div>`).join('')}
+  </div>`;
+
+  const demo3=[
+    {g:'Group C',d:'Jun 14',h:'Brazil',a:'Chile',hs:3,as:0},
+    {g:'Group A',d:'Jun 14',h:'USA',a:'Mexico',hs:2,as:1},
+    {g:'Group B',d:'Jun 15',h:'Spain',a:'Morocco',hs:1,as:1}
+  ];
+  document.getElementById('wc-overview-results').innerHTML=`<div class="three-col">${demo3.map(m=>`
+    <div class="match-card"><div class="match-top"><span>${m.g} · ${m.d}</span><span class="rpill rpill-ft">FT</span></div>
+    <div class="match-body">
+      <div class="mt"><span class="mt-flag">${tf(m.h)}</span><span class="mt-name">${tf(m.h)} ${m.h}</span></div>
+      <div class="score-box"><span class="${m.hs>m.as?'sw':'sl'}">${m.hs}</span><span class="ssep">–</span><span class="${m.as>m.hs?'sw':'sl'}">${m.as}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(m.a)}</span><span class="mt-name">${tf(m.a)} ${m.a}</span></div>
+    </div></div>`).join('')}</div>`;
+
+  const setup=``;
+
+  const demoGroups=[
+    {name:'Group A',teams:[{n:'USA',p:2,w:2,l:0,pts:6},{n:'Mexico',p:2,w:1,l:1,pts:3},{n:'Panama',p:2,w:0,l:1,pts:1},{n:'Bolivia',p:2,w:0,l:2,pts:0}]},
+    {name:'Group B',teams:[{n:'Spain',p:2,w:1,l:0,pts:4},{n:'Croatia',p:2,w:1,l:1,pts:3},{n:'Morocco',p:2,w:0,l:0,pts:2},{n:'Japan',p:2,w:0,l:1,pts:1}]},
+    {name:'Group C',teams:[{n:'Brazil',p:2,w:2,l:0,pts:6},{n:'Germany',p:2,w:1,l:1,pts:3},{n:'Serbia',p:2,w:0,l:1,pts:1},{n:'Chile',p:2,w:0,l:2,pts:0}]},
+    {name:'Group D',teams:[{n:'France',p:2,w:1,l:0,pts:4},{n:'Argentina',p:2,w:1,l:0,pts:4},{n:'Denmark',p:2,w:0,l:1,pts:1},{n:'Ecuador',p:2,w:0,l:2,pts:0}]},
+  ];
+  const gcards=demoGroups.map(g=>{
+    const rows=g.teams.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
+      `<div class="grow"><div class="grow-team ${i<2?'q':''}">${tf(t.n)} ${t.n}</div>
+       <span class="grow-n">${t.p}</span><span class="grow-n">${t.w}</span><span class="grow-n">${t.l}</span><span class="grow-pts">${t.pts}</span></div>`
+    ).join('');
+    return`<div class="group-card"><div class="group-head"><span class="group-head-name">${g.name}</span></div>
+      <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>${rows}</div>`;
+  }).join('');
+  document.getElementById('wc-groups-inner').innerHTML=setup+`<div class="groups-grid">${gcards}</div>`;
+
+  const demoResults=[
+    {g:'Group C',d:'Jun 14',h:'Brazil',a:'Chile',hs:3,as:0},{g:'Group A',d:'Jun 14',h:'USA',a:'Mexico',hs:2,as:1},
+    {g:'Group B',d:'Jun 15',h:'Spain',a:'Morocco',hs:1,as:1},{g:'Group D',d:'Jun 15',h:'France',a:'Ecuador',hs:2,as:0},
+    {g:'Group C',d:'Jun 16',h:'Germany',a:'Serbia',hs:2,as:1},{g:'Group D',d:'Jun 16',h:'Argentina',a:'Denmark',hs:0,as:0}
+  ];
+  document.getElementById('wc-results-inner').innerHTML=setup+`<div class="three-col">${demoResults.map(m=>`
+    <div class="match-card"><div class="match-top"><span>${m.g} · ${m.d}</span><span class="rpill rpill-ft">FT</span></div>
+    <div class="match-body">
+      <div class="mt"><span class="mt-flag">${tf(m.h)}</span><span class="mt-name">${tf(m.h)} ${m.h}</span></div>
+      <div class="score-box"><span class="${m.hs>m.as?'sw':'sl'}">${m.hs}</span><span class="ssep">–</span><span class="${m.as>m.hs?'sw':'sl'}">${m.as}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(m.a)}</span><span class="mt-name">${tf(m.a)} ${m.a}</span></div>
+    </div></div>`).join('')}</div>`;
+
+  const demoFix=[
+    {h:'Japan',a:'Croatia',d:'Jun 17',t:'18:00',g:'Group B'},{h:'Panama',a:'Bolivia',d:'Jun 17',t:'21:00',g:'Group A'},
+    {h:'Brazil',a:'Serbia',d:'Jun 18',t:'18:00',g:'Group C'},{h:'Mexico',a:'USA',d:'Jun 18',t:'21:00',g:'Group A'},
+    {h:'Argentina',a:'Ecuador',d:'Jun 19',t:'18:00',g:'Group D'},{h:'France',a:'Denmark',d:'Jun 19',t:'21:00',g:'Group D'},
+    {h:'Spain',a:'Japan',d:'Jun 20',t:'18:00',g:'Group B'},{h:'Germany',a:'Chile',d:'Jun 20',t:'21:00',g:'Group C'}
+  ];
+  document.getElementById('wc-fixtures-inner').innerHTML=setup+`<div class="fix-panel">${demoFix.map(f=>`
+    <div class="fix-row">
+      <div class="fix-teams">${tf(f.h)} <span>${tf(f.h)} ${f.h}</span><span class="fix-vs">vs</span>${tf(f.a)} <span>${tf(f.a)} ${f.a}</span></div>
+      <div class="fix-right"><div class="fix-date">${f.d} · ${f.g}</div><div class="fix-time">${f.t}</div></div>
+    </div>`).join('')}</div>`;
 }
 
+// ── INIT ───────────────────────────────────────────────────────────────
 loadF1();
 loadWC();
 </script>
