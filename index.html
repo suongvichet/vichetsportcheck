@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sportcheck — World Cup & Formula 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface2: #1e2130;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f2f7;
+    --muted: rgba(240,242,247,0.45);
+    --muted2: rgba(240,242,247,0.35);
+    --f1: #e8002d;
+    --wc: #1a9e5c;
+    --gold: #f5c842;
+    --silver: #b0b8c8;
+    --bronze: #cd7c3a;
+    --fd: 'Barlow Condensed', sans-serif;
+    --fb: 'Inter', sans-serif;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: var(--fb); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+  .hero { padding: 28px 24px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  .hero-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+  .logo { font-family: var(--fd); font-size: 26px; font-weight: 800; letter-spacing: 0.06em; color: #fff; }
+  .logo span { color: var(--f1); }
+  .live-pill { background: rgba(232,0,45,0.15); color: #ff5570; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+  .live-dot { width: 6px; height: 6px; background: var(--f1); border-radius: 50%; animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .nav-tabs { display: flex; gap: 0; max-width: 1100px; margin: 0 auto; }
+  .ntab { padding: 12px 20px; border: none; background: none; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; font-family: var(--fb); display: flex; align-items: center; gap: 7px; transition: color 0.15s; }
+  .ntab.active { color: #fff; border-bottom-color: var(--f1); }
+  .ntab.wc.active { border-bottom-color: var(--wc); }
+  .ntab svg { opacity: 0.65; }
+  .ntab.active svg { opacity: 1; }
+
+  .content { padding: 24px; max-width: 1100px; margin: 0 auto; display: none; }
+  .content.active { display: block; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .stat-icon { font-size: 24px; margin-bottom: 6px; }
+  .stat-val { font-family: var(--fd); font-size: 28px; font-weight: 800; color: #fff; line-height: 1; }
+  .stat-lbl { font-size: 11px; color: var(--muted2); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .section-title { font-family: var(--fd); font-size: 17px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--f1); margin: 28px 0 14px; display: flex; align-items: center; gap: 9px; }
+  .section-title:first-child { margin-top: 0; }
+  .section-title.green { color: var(--wc); }
+  .section-title .sub { font-family: var(--fb); font-size: 11px; font-weight: 400; color: var(--muted2); text-transform: none; letter-spacing: 0; margin-left: auto; }
+
+  .standings { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .standings thead tr { border-bottom: 1px solid var(--border); }
+  .standings th { padding: 10px 12px; font-size: 10px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; text-align: left; }
+  .standings th.r { text-align: right; }
+  .standings td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .standings tr:last-child td { border: none; }
+  .standings tbody tr:hover { background: var(--surface2); }
+  .pos { width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: var(--surface2); color: var(--muted); }
+  .pos.p1 { background: rgba(245,200,66,0.15); color: var(--gold); }
+  .pos.p2 { background: rgba(176,184,200,0.12); color: var(--silver); }
+  .pos.p3 { background: rgba(205,124,58,0.15); color: var(--bronze); }
+  .tbar { display: inline-block; width: 3px; height: 18px; border-radius: 2px; margin-right: 9px; vertical-align: middle; }
+  .num { text-align: right; color: rgba(240,242,247,0.6); }
+  .pts { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--f1); text-align: right; }
+  .pts.green { color: var(--wc); }
+  .flag { font-size: 18px; margin-right: 6px; }
+  .team-cell { color: var(--muted); font-size: 12px; }
+
+  .race-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .race-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; transition: border-color 0.15s; }
+  .race-card:hover { border-color: var(--border2); }
+  .race-card.next { border-color: var(--f1); background: #1a0f11; }
+  .rc-round { font-size: 10px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+  .rc-round.next { color: var(--f1); }
+  .rc-name { font-family: var(--fd); font-size: 17px; font-weight: 700; margin-bottom: 2px; line-height: 1.1; }
+  .rc-circuit { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .rc-date { font-size: 11px; color: rgba(240,242,247,0.55); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .rc-winner { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; display: flex; align-items: center; gap: 6px; color: rgba(240,242,247,0.7); }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .badge-next { background: rgba(232,0,45,0.2); color: #ff5570; }
+  .badge-done { background: rgba(255,255,255,0.07); color: var(--muted2); }
+  .badge-sched { background: rgba(26,158,92,0.18); color: #3dd68c; }
+
+  .match-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .match-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; transition: border-color 0.15s; }
+  .match-card:hover { border-color: var(--border2); }
+  .match-top { font-size: 10px; color: var(--muted2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+  .match-body { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .mt { flex: 1; text-align: center; }
+  .mt-flag { font-size: 28px; display: block; margin-bottom: 4px; }
+  .mt-name { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .score-box { font-family: var(--fd); font-size: 32px; font-weight: 800; display: flex; align-items: center; gap: 6px; color: #fff; }
+  .score-sep { color: rgba(240,242,247,0.25); font-size: 20px; }
+  .s-dim { color: rgba(240,242,247,0.3); }
+
+  .group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .group-head { background: var(--surface2); padding: 9px 14px; font-family: var(--fd); font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wc); border-bottom: 1px solid var(--border); }
+  .grow { display: grid; grid-template-columns: 1fr 26px 26px 26px 32px; padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; gap: 4px; }
+  .grow:last-child { border: none; }
+  .grow.hdr { font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 6px; }
+  .grow .n { text-align: right; color: var(--muted); }
+  .grow .gpts { text-align: right; font-weight: 700; color: var(--wc); font-family: var(--fd); font-size: 15px; }
+  .qual-bar { height: 1px; background: rgba(26,158,92,0.3); margin: 0 14px; }
+  .qual-team { font-weight: 600; }
+
+  .fixtures { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0 16px; }
+  .fixture { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .fixture:last-child { border: none; }
+  .fix-teams { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .fix-vs { color: var(--muted2); font-size: 11px; }
+  .fix-time { text-align: right; }
+  .fix-date { font-size: 11px; color: var(--muted2); }
+  .fix-kick { font-size: 13px; font-weight: 600; color: var(--wc); font-family: var(--fd); }
+
+  .loading { text-align: center; padding: 2.5rem; color: var(--muted); font-size: 13px; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--f1); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 1rem; }
+  .spinner.wc { border-top-color: var(--wc); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { background: rgba(232,0,45,0.08); border: 1px solid rgba(232,0,45,0.3); border-radius: 12px; padding: 14px 16px; color: #ff6b7a; font-size: 13px; margin-bottom: 12px; }
+  .setup { background: rgba(26,158,92,0.08); border: 1px solid rgba(26,158,92,0.3); border-radius: 12px; padding: 14px 16px; color: #3dd68c; font-size: 13px; margin-bottom: 16px; line-height: 1.8; }
+  .setup code { background: rgba(0,0,0,0.35); padding: 1px 6px; border-radius: 3px; font-size: 12px; }
+  .setup a { color: #5fe8a3; }
+  .sample-note { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+
+  footer { text-align: center; padding: 2rem; color: var(--muted2); font-size: 11px; border-top: 1px solid var(--border); margin-top: 2.5rem; }
+  footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+  @media (max-width: 720px) {
+    .hero { padding: 20px 16px 0; }
+    .content { padding: 16px; }
+    .stat-row { grid-template-columns: repeat(2,1fr); }
+    .race-grid { grid-template-columns: 1fr; }
+    .match-grid, .group-grid { grid-template-columns: 1fr; }
+    .logo { font-size: 20px; }
+    .ntab { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-top">
+    <div class="logo">SPORT<span>CHECK</span></div>
+    <div class="live-pill"><span class="live-dot"></span> Live data</div>
+  </div>
+  <div class="nav-tabs">
+    <button class="ntab active" id="tab-f1" onclick="showTab('f1')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 3-6 4 10"/><circle cx="19" cy="17" r="2"/><circle cx="5" cy="17" r="2"/></svg>
+      Formula 1
+    </button>
+    <button class="ntab wc" id="tab-wc" onclick="showTab('wc')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3c-2.5 2-4 5.5-4 9s1.5 7 4 9c2.5-2 4-5.5 4-9s-1.5-7-4-9zM3 12h18"/></svg>
+      World Cup
+    </button>
+  </div>
+</div>
+
+<!-- ===== F1 ===== -->
+<div class="content active" id="content-f1">
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val" id="f1-rounds">–</div><div class="stat-lbl">Rounds</div></div>
+    <div class="stat-card"><div class="stat-icon">🏎️</div><div class="stat-val" id="f1-drivers-count">–</div><div class="stat-lbl">Drivers</div></div>
+    <div class="stat-card"><div class="stat-icon">🏁</div><div class="stat-val" id="f1-teams-count">–</div><div class="stat-lbl">Teams</div></div>
+    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="f1-season">–</div><div class="stat-lbl">Season</div></div>
+  </div>
+
+  <div class="section-title">
+    <svg width="16" height="16" fill="none" stroke="#e8002d" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    Driver standings
+  </div>
+  <div id="f1-drivers"><div class="loading"><div class="spinner"></div>Fetching standings…</div></div>
+
+  <div class="section-title">
+    <svg width="16" height="16" fill="none" stroke="#e8002d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Constructor standings
+  </div>
+  <div id="f1-constructors"><div class="loading"><div class="spinner"></div>Fetching constructors…</div></div>
+
+  <div class="section-title">
+    <svg width="16" height="16" fill="none" stroke="#e8002d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+    Race calendar
+    <span class="sub" id="f1-next-label"></span>
+  </div>
+  <div id="f1-schedule"><div class="loading"><div class="spinner"></div>Fetching schedule…</div></div>
+</div>
+
+<!-- ===== WORLD CUP ===== -->
+<div class="content" id="content-wc">
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-icon">🌍</div><div class="stat-val">48</div><div class="stat-lbl">Teams</div></div>
+    <div class="stat-card"><div class="stat-icon">⚽</div><div class="stat-val">104</div><div class="stat-lbl">Matches</div></div>
+    <div class="stat-card"><div class="stat-icon">🏟️</div><div class="stat-val">16</div><div class="stat-lbl">Venues</div></div>
+    <div class="stat-card"><div class="stat-icon">🇺🇸</div><div class="stat-val">2026</div><div class="stat-lbl">USA·CAN·MEX</div></div>
+  </div>
+
+  <div class="section-title green">
+    <svg width="16" height="16" fill="none" stroke="#1a9e5c" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    Group standings
+  </div>
+  <div id="wc-groups"><div class="loading"><div class="spinner wc"></div>Fetching groups…</div></div>
+
+  <div class="section-title green">
+    <svg width="16" height="16" fill="none" stroke="#1a9e5c" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+    Recent results
+  </div>
+  <div id="wc-results"><div class="loading"><div class="spinner wc"></div>Fetching results…</div></div>
+
+  <div class="section-title green">
+    <svg width="16" height="16" fill="none" stroke="#1a9e5c" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+    Upcoming fixtures
+  </div>
+  <div id="wc-fixtures"><div class="loading"><div class="spinner wc"></div>Fetching fixtures…</div></div>
+</div>
+
+<footer>
+  F1 data via <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1 API</a> ·
+  World Cup via <a href="https://www.football-data.org/" target="_blank">football-data.org</a> ·
+  Built with GitHub Pages
+</footer>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.getElementById('content-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+const teamColors = {
+  'Red Bull':'#3671C6','Mercedes':'#27F4D2','Ferrari':'#E8002D','McLaren':'#FF8000',
+  'Aston Martin':'#229971','Alpine':'#FF87BC','Williams':'#64C4FF','RB':'#6692FF',
+  'Racing Bulls':'#6692FF','Sauber':'#52E252','Kick Sauber':'#52E252','Haas':'#B6BABD','Audi':'#52E252'
+};
+function teamColor(name){ if(!name) return '#888'; for(const k in teamColors){ if(name.includes(k)) return teamColors[k]; } return '#888'; }
+
+const natFlags = {British:'GB',Dutch:'NL',Monegasque:'MC',Spanish:'ES',Mexican:'MX',Australian:'AU',
+  Canadian:'CA',Finnish:'FI',German:'DE',French:'FR',Thai:'TH',Japanese:'JP',Danish:'DK',Chinese:'CN',
+  American:'US',Italian:'IT',Brazilian:'BR',Argentine:'AR',Austrian:'AT','New Zealander':'NZ'};
+function natFlag(nat){ return flagEmoji(natFlags[nat] || '??'); }
+function flagEmoji(code){ if(!code||code.length!==2) return '🏳'; const o=127397; return [...code.toUpperCase()].map(c=>String.fromCodePoint(c.charCodeAt(0)+o)).join(''); }
+
+const teamEmoji = {USA:'🇺🇸',Mexico:'🇲🇽',Brazil:'🇧🇷',Argentina:'🇦🇷',France:'🇫🇷',Germany:'🇩🇪',
+  Spain:'🇪🇸',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Japan:'🇯🇵',Morocco:'🇲🇦',Croatia:'🇭🇷',Denmark:'🇩🇰',Portugal:'🇵🇹',
+  Netherlands:'🇳🇱',Italy:'🇮🇹',Serbia:'🇷🇸',Chile:'🇨🇱',Ecuador:'🇪🇨',Panama:'🇵🇦',Bolivia:'🇧🇴',
+  Canada:'🇨🇦',Thailand:'🇹🇭',Belgium:'🇧🇪',Uruguay:'🇺🇾',Colombia:'🇨🇴',Senegal:'🇸🇳'};
+function teamFlag(name){ return teamEmoji[name] || '🏳'; }
+
+function fDate(s){ return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function fDateShort(s){ return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+function fTime(s){ return new Date(s).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function posBadge(p){ const c=p==1?'p1':p==2?'p2':p==3?'p3':''; return `<span class="pos ${c}">${p}</span>`; }
+
+const F1 = 'https://api.jolpica.com/ergast/f1/current';
+
+async function loadF1(){ await Promise.all([f1Drivers(), f1Constructors(), f1Schedule()]); }
+
+async function f1Drivers(){
+  const el = document.getElementById('f1-drivers');
+  try{
+    const j = await (await fetch(`${F1}/driverstandings/`)).json();
+    const list = j.MRData.StandingsTable.StandingsLists[0];
+    document.getElementById('f1-season').textContent = j.MRData.StandingsTable.season;
+    const s = list?.DriverStandings || [];
+    document.getElementById('f1-drivers-count').textContent = s.length || '–';
+    if(!s.length){ el.innerHTML = '<div class="error">No standings yet for this season.</div>'; return; }
+    const rows = s.map(d=>{
+      const dr=d.Driver, c=d.Constructors[0], clr=teamColor(c?.name);
+      return `<tr><td>${posBadge(d.position)}</td>
+        <td><span class="tbar" style="background:${clr}"></span><span class="flag">${natFlag(dr.nationality)}</span>${dr.givenName} <strong>${dr.familyName}</strong></td>
+        <td class="team-cell">${c?.name||''}</td>
+        <td class="num">${d.wins}</td><td class="pts">${d.points}</td></tr>`;
+    }).join('');
+    el.innerHTML = `<table class="standings"><thead><tr><th style="width:40px">Pos</th><th>Driver</th><th>Team</th><th class="r">Wins</th><th class="r">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){ el.innerHTML = `<div class="error">Could not load driver standings. ${e.message}</div>`; }
+}
+
+async function f1Constructors(){
+  const el = document.getElementById('f1-constructors');
+  try{
+    const j = await (await fetch(`${F1}/constructorstandings/`)).json();
+    const s = j.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || [];
+    document.getElementById('f1-teams-count').textContent = s.length || '–';
+    if(!s.length){ el.innerHTML = '<div class="error">No constructor standings yet.</div>'; return; }
+    const rows = s.map(c=>{
+      const ct=c.Constructor, clr=teamColor(ct.name);
+      return `<tr><td>${posBadge(c.position)}</td>
+        <td><span class="tbar" style="background:${clr}"></span><strong>${ct.name}</strong></td>
+        <td class="team-cell">${flagEmoji(natFlags[ct.nationality]||'')} ${ct.nationality}</td>
+        <td class="num">${c.wins}</td><td class="pts">${c.points}</td></tr>`;
+    }).join('');
+    el.innerHTML = `<table class="standings"><thead><tr><th style="width:40px">Pos</th><th>Constructor</th><th>Country</th><th class="r">Wins</th><th class="r">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){ el.innerHTML = `<div class="error">Could not load constructor standings. ${e.message}</div>`; }
+}
+
+async function f1Schedule(){
+  const el = document.getElementById('f1-schedule');
+  try{
+    const [sj, rj] = await Promise.all([
+      (await fetch(`${F1}/races/`)).json(),
+      (await fetch(`${F1}/results/1/`)).json()
+    ]);
+    const races = sj.MRData.RaceTable.Races;
+    document.getElementById('f1-rounds').textContent = races.length || '–';
+    const resMap = {};
+    rj.MRData.RaceTable.Races.forEach(r=>{ resMap[r.round]=r.Results?.[0]; });
+    const now = new Date();
+    let nextIdx = races.findIndex(r=> new Date(r.date) > now);
+    const next = races[nextIdx];
+    if(next) document.getElementById('f1-next-label').textContent = `Next: ${next.raceName}`;
+    const cards = races.map((r,i)=>{
+      const past = new Date(r.date) < now;
+      const isNext = i===nextIdx;
+      const w = resMap[r.round];
+      const badge = isNext?'<span class="badge badge-next">Up next</span>':past?'<span class="badge badge-done">Done</span>':'<span class="badge badge-sched">Scheduled</span>';
+      const winner = w?`<div class="rc-winner">🥇 <strong>${w.Driver.familyName}</strong> — ${w.Constructor.name}</div>`:'';
+      return `<div class="race-card ${isNext?'next':''}">
+        <div class="rc-round ${isNext?'next':''}">Round ${r.round} · ${r.Circuit.Location.country}</div>
+        <div class="rc-name">${r.raceName}</div>
+        <div class="rc-circuit">${r.Circuit.circuitName}</div>
+        <div class="rc-date">📅 ${fDate(r.date)} ${badge}</div>
+        ${winner}</div>`;
+    }).join('');
+    el.innerHTML = `<div class="race-grid">${cards}</div>`;
+  }catch(e){ el.innerHTML = `<div class="error">Could not load schedule. ${e.message}</div>`; }
+}
+
+const FD_KEY = 'YOUR_API_KEY';
+const WC = 'https://api.football-data.org/v4/competitions/2000';
+
+async function fd(path){
+  const r = await fetch(WC+path, { headers:{'X-Auth-Token':FD_KEY} });
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+async function loadWC(){
+  if(FD_KEY === 'YOUR_API_KEY'){ wcDemo(); return; }
+  await Promise.all([wcGroups(), wcResults(), wcFixtures()]);
+}
+
+async function wcGroups(){
+  const el = document.getElementById('wc-groups');
+  try{
+    const j = await fd('/standings');
+    const groups = (j.standings||[]).filter(s=>s.type==='TOTAL' && s.group);
+    if(!groups.length){ el.innerHTML='<div class="error">Group stage not available yet.</div>'; return; }
+    el.innerHTML = `<div class="group-grid">${groups.map(g=>groupCard(g.group, g.table.map(t=>({
+      name:t.team.shortName||t.team.name, p:t.playedGames, w:t.won, l:t.lost, pts:t.points
+    })))).join('')}</div>`;
+  }catch(e){ el.innerHTML = `<div class="error">Could not load groups. ${e.message}</div>`; }
+}
+async function wcResults(){
+  const el = document.getElementById('wc-results');
+  try{
+    const j = await fd('/matches?status=FINISHED');
+    const m = (j.matches||[]).slice(-8).reverse();
+    if(!m.length){ el.innerHTML='<div class="error">No results yet.</div>'; return; }
+    el.innerHTML = `<div class="match-grid">${m.map(x=>matchCard(
+      x.group||'', fDateShort(x.utcDate),
+      x.homeTeam.shortName||x.homeTeam.name, x.awayTeam.shortName||x.awayTeam.name,
+      x.score.fullTime.home, x.score.fullTime.away
+    )).join('')}</div>`;
+  }catch(e){ el.innerHTML = `<div class="error">Could not load results. ${e.message}</div>`; }
+}
+async function wcFixtures(){
+  const el = document.getElementById('wc-fixtures');
+  try{
+    const j = await fd('/matches?status=SCHEDULED');
+    const m = (j.matches||[]).slice(0,8);
+    if(!m.length){ el.innerHTML='<div class="error">No upcoming fixtures.</div>'; return; }
+    el.innerHTML = `<div class="fixtures">${m.map(x=>fixtureRow(
+      x.homeTeam.shortName||x.homeTeam.name, x.awayTeam.shortName||x.awayTeam.name,
+      fDateShort(x.utcDate), fTime(x.utcDate), x.group||''
+    )).join('')}</div>`;
+  }catch(e){ el.innerHTML = `<div class="error">Could not load fixtures. ${e.message}</div>`; }
+}
+
+function groupCard(name, teams){
+  const rows = teams.map((t,i)=>(i===2?'<div class="qual-bar"></div>':'')+
+    `<div class="grow"><span>${teamFlag(t.name)} <span class="${i<2?'qual-team':''}">${t.name}</span></span><span class="n">${t.p}</span><span class="n">${t.w}</span><span class="n">${t.l}</span><span class="gpts">${t.pts}</span></div>`).join('');
+  return `<div class="group-card"><div class="group-head">${name}</div>
+    <div class="grow hdr"><span>Team</span><span class="n">P</span><span class="n">W</span><span class="n">L</span><span class="gpts">Pts</span></div>${rows}</div>`;
+}
+function matchCard(group, date, home, away, hs, as){
+  const hw=hs>as, aw=as>hs;
+  return `<div class="match-card"><div class="match-top"><span>${group} · ${date}</span><span class="badge badge-done">FT</span></div>
+    <div class="match-body">
+      <div class="mt"><span class="mt-flag">${teamFlag(home)}</span><span class="mt-name">${home}</span></div>
+      <div class="score-box"><span class="${hw?'':'s-dim'}">${hs}</span><span class="score-sep">–</span><span class="${aw?'':'s-dim'}">${as}</span></div>
+      <div class="mt"><span class="mt-flag">${teamFlag(away)}</span><span class="mt-name">${away}</span></div>
+    </div></div>`;
+}
+function fixtureRow(home, away, date, time, group){
+  return `<div class="fixture">
+    <div class="fix-teams">${teamFlag(home)} <span>${home}</span><span class="fix-vs">vs</span>${teamFlag(away)} <span>${away}</span></div>
+    <div class="fix-time"><div class="fix-date">${date} · ${group}</div><div class="fix-kick">${time}</div></div></div>`;
+}
+
+function wcDemo(){
+  document.getElementById('wc-groups').innerHTML =
+    `<div class="setup"><strong>Setup needed for live data:</strong><br>
+     1. Get a free key at <a href="https://www.football-data.org/client/register" target="_blank">football-data.org</a><br>
+     2. In <code>index.html</code>, replace <code>YOUR_API_KEY</code> with your key<br>
+     3. Refresh — real groups, results &amp; fixtures appear here</div>
+     <p class="sample-note">Showing sample data below ↓</p>
+     <div class="group-grid">
+       ${groupCard('Group A',[{name:'USA',p:2,w:2,l:0,pts:6},{name:'Mexico',p:2,w:1,l:1,pts:3},{name:'Panama',p:2,w:0,l:1,pts:1},{name:'Bolivia',p:2,w:0,l:2,pts:0}])}
+       ${groupCard('Group B',[{name:'Spain',p:2,w:2,l:0,pts:6},{name:'Croatia',p:2,w:1,l:1,pts:3},{name:'Morocco',p:2,w:0,l:1,pts:1},{name:'Japan',p:2,w:0,l:2,pts:0}])}
+       ${groupCard('Group C',[{name:'Brazil',p:2,w:2,l:0,pts:6},{name:'Germany',p:2,w:1,l:1,pts:3},{name:'Serbia',p:2,w:0,l:1,pts:1},{name:'Chile',p:2,w:0,l:2,pts:0}])}
+       ${groupCard('Group D',[{name:'France',p:2,w:1,l:0,pts:4},{name:'Argentina',p:2,w:1,l:0,pts:4},{name:'Denmark',p:2,w:0,l:1,pts:1},{name:'Ecuador',p:2,w:0,l:1,pts:1}])}
+     </div>`;
+  document.getElementById('wc-results').innerHTML =
+    `<div class="match-grid">
+      ${matchCard('Group A','Jun 14','USA','Mexico',2,1)}
+      ${matchCard('Group B','Jun 15','Spain','Morocco',1,1)}
+      ${matchCard('Group C','Jun 14','Brazil','Chile',3,0)}
+      ${matchCard('Group D','Jun 15','France','Ecuador',2,0)}
+    </div>`;
+  document.getElementById('wc-fixtures').innerHTML =
+    `<div class="fixtures">
+      ${fixtureRow('Japan','Croatia','Jun 17','18:00','Group B')}
+      ${fixtureRow('Panama','Bolivia','Jun 17','21:00','Group A')}
+      ${fixtureRow('Brazil','Serbia','Jun 18','18:00','Group C')}
+      ${fixtureRow('Argentina','Ecuador','Jun 19','21:00','Group D')}
+    </div>`;
+}
+
+loadF1();
+loadWC();
+</script>
+</body>
+</html>
