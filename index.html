@@ -300,9 +300,9 @@ footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
   <div class="refresh-bar">
     <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M20 9A9 9 0 0 0 5.64 5.64M4 15a9 9 0 0 0 14.36 3.36"/></svg>
-      Refresh scores
+      <span>Refresh scores</span>
     </button>
-    <span class="req-badge" id="req-badge">– / 100 today</span>
+    <span class="req-badge" id="req-badge">Free · No limit</span>
     <span class="last-updated" id="last-updated">Not yet updated</span>
   </div>
 
@@ -348,7 +348,7 @@ footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 
 <footer>
   F1 via <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1 API</a> ·
-  World Cup via <a href="https://www.api-football.com" target="_blank">API-Football</a> (free tier) ·
+  World Cup via <a href="https://worldcup26.ir" target="_blank">worldcup26.ir (free, real-time)</a> ·
   Hosted on GitHub Pages
 </footer>
 
@@ -493,172 +493,108 @@ async function f1Schedule(){
   }catch(e){el.innerHTML=`<div class="err">Could not load schedule. ${e.message}</div>`}
 }
 
-// ── WORLD CUP — API-Football (api-sports.io) ──────────────────────────
-// Get your FREE key at: https://dashboard.api-sports.io/register
-// Replace YOUR_API_KEY below — 100 free requests per day, resets midnight UTC
-const AF_KEY = 'cd3ed30e0a070174fc2f90a759b6df49';
-const AF_BASE = 'https://v3.football.api-sports.io';
-const WC_LEAGUE = 1;
-const WC_SEASON = 2026;
+// ── WORLD CUP — worldcup26.ir (free, no key, real-time) ───────────────
+const WC_GAMES   = 'https://worldcup26.ir/get/games';
+const WC_GROUPS  = 'https://worldcup26.ir/get/groups';
 
-let reqUsed = parseInt(localStorage.getItem('af_req_used') || '0');
-let reqDate = localStorage.getItem('af_req_date') || '';
-let liveTimer = null;
-
-function todayUTC(){ return new Date().toISOString().slice(0,10); }
-
-function trackRequest(headers){
-  const used = parseInt(headers.get('x-ratelimit-requests-limit') && headers.get('x-rateLimit-requests-remaining')
-    ? (100 - parseInt(headers.get('x-rateLimit-requests-remaining')))
-    : reqUsed + 1);
-  const today = todayUTC();
-  if(reqDate !== today){ reqUsed = 0; reqDate = today; }
-  reqUsed = used;
-  localStorage.setItem('af_req_used', reqUsed);
-  localStorage.setItem('af_req_date', today);
-  updateReqBadge();
-}
-
-function updateReqBadge(){
-  const today = todayUTC();
-  if(reqDate !== today){ reqUsed = 0; }
-  const el = document.getElementById('req-badge');
-  if(!el) return;
-  const left = 100 - reqUsed;
-  el.textContent = `${reqUsed} / 100 used today`;
-  el.className = 'req-badge' + (left <= 10 ? ' danger' : left <= 30 ? ' warn' : '');
-}
-
-function setLastUpdated(){
-  const el = document.getElementById('last-updated');
-  if(el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-}
-
-async function afFetch(path){
-  if(AF_KEY === 'YOUR_API_KEY') throw new Error('NO_KEY');
-  const today = todayUTC();
-  if(reqDate !== today){ reqUsed = 0; reqDate = today; }
-  if(reqUsed >= 100) throw new Error('LIMIT');
-  const r = await fetch(`${AF_BASE}${path}`, {
-    headers: { 'x-apisports-key': AF_KEY }
-  });
-  trackRequest(r.headers);
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-}
-
-async function loadWC(){
-  if(AF_KEY === 'YOUR_API_KEY'){
-    showKeyPrompt();
-    return;
-  }
-  await refreshWC();
-}
+async function loadWC(){ await refreshWC(); }
 
 async function manualRefresh(){
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
   btn.classList.add('spinning');
+  btn.querySelector('span').textContent = 'Refreshing…';
   await refreshWC();
   btn.disabled = false;
   btn.classList.remove('spinning');
+  btn.querySelector('span').textContent = 'Refresh scores';
 }
 
 async function refreshWC(){
   try{
-    const today = todayUTC();
-    if(reqDate !== today){ reqUsed = 0; reqDate = today; }
-    if(reqUsed >= 98){
-      showLimitWarning();
-      return;
-    }
-
-    const [fixturesRes, standingsRes] = await Promise.all([
-      afFetch(`/fixtures?league=${WC_LEAGUE}&season=${WC_SEASON}`),
-      afFetch(`/standings?league=${WC_LEAGUE}&season=${WC_SEASON}`)
+    const [gamesRes, groupsRes] = await Promise.all([
+      fetch(WC_GAMES).then(r=>r.json()),
+      fetch(WC_GROUPS).then(r=>r.json())
     ]);
 
-    const fixtures = fixturesRes.response || [];
-    const finished = fixtures.filter(f => f.fixture.status.short === 'FT' || f.fixture.status.short === 'AET' || f.fixture.status.short === 'PEN');
-    const live = fixtures.filter(f => ['1H','HT','2H','ET','BT','P','INT'].includes(f.fixture.status.short));
-    const upcoming = fixtures.filter(f => f.fixture.status.short === 'NS').sort((a,b)=>new Date(a.fixture.date)-new Date(b.fixture.date));
+    const games   = Array.isArray(gamesRes)  ? gamesRes  : gamesRes.data  || gamesRes.games  || [];
+    const groups  = Array.isArray(groupsRes) ? groupsRes : groupsRes.data || groupsRes.groups || [];
 
-    const totalGoals = finished.reduce((a,f)=>a+(f.goals.home||0)+(f.goals.away||0),0);
-    document.getElementById('wc-goals').textContent = totalGoals || '–';
-    document.getElementById('wc-played').textContent = finished.length || '–';
-    document.getElementById('wc-gpg').textContent = finished.length ? +(totalGoals/finished.length).toFixed(1) : '–';
+    const finished = games.filter(m=> m.status==='finished' || m.status==='FT' || m.score?.ft || m.result);
+    const live     = games.filter(m=> m.status==='live' || m.status==='1H' || m.status==='2H' || m.status==='HT');
+    const upcoming = games.filter(m=> m.status==='scheduled' || m.status==='NS' || (!m.score?.ft && !m.result && !live.includes(m)));
+
+    const totalGoals = finished.reduce((a,m)=>{
+      const s = m.score?.ft || m.score || m.result || {};
+      const h = s[0]??s.home??s.homeGoals??0;
+      const aw = s[1]??s.away??s.awayGoals??0;
+      return a + (+h||0) + (+aw||0);
+    }, 0);
+
+    document.getElementById('wc-goals').textContent   = totalGoals || '–';
+    document.getElementById('wc-played').textContent  = finished.length || '–';
+    document.getElementById('wc-gpg').textContent     = finished.length ? +(totalGoals/finished.length).toFixed(1) : '–';
 
     const liveBanner = document.getElementById('live-banner');
     if(live.length > 0){
       liveBanner.classList.add('show');
       liveBanner.innerHTML = `<span style="width:8px;height:8px;background:var(--f1);border-radius:50%;animation:blink 1s infinite;display:inline-block"></span>
-        🔴 ${live.length} match${live.length>1?'es':''} live now — auto-refreshing every 60s`;
-      startLivePolling();
+        🔴 ${live.length} match${live.length>1?'es':''} live now — press Refresh to update`;
     } else {
       liveBanner.classList.remove('show');
-      stopLivePolling();
     }
 
-    buildAFScorers(fixtures);
-    buildAFGoalsChart(finished);
-    buildAFOverviewResults([...live, ...finished.slice(-3).reverse()].slice(0,3));
-    buildAFGroups(standingsRes.response);
-    buildAFResults([...live, ...finished.slice(-9).reverse()].slice(0,9));
-    buildAFFixtures(upcoming.slice(0,10));
+    buildScorers(finished);
+    buildGoalsChart(finished, groups);
+    buildOverviewResults([...live,...finished].slice(-3).reverse());
+    buildGroups(groups, games);
+    buildResults([...live,...finished.slice(-9).reverse()].slice(0,9));
+    buildFixtures(upcoming.slice(0,10));
     setLastUpdated();
-    updateReqBadge();
 
   }catch(e){
-    if(e.message === 'LIMIT'){ showLimitWarning(); return; }
-    if(e.message === 'NO_KEY'){ showKeyPrompt(); return; }
-    const msg = `<div class="err">Could not load data: ${e.message}</div>`;
+    const msg = `<div class="err">⚠️ Could not load data: ${e.message}<br><small>Check your internet connection and try refreshing again.</small></div>`;
     ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
       .forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=msg; });
   }
 }
 
-function startLivePolling(){
-  if(liveTimer) return;
-  liveTimer = setInterval(()=>{ if(reqUsed < 98) refreshWC(); }, 60000);
-}
-function stopLivePolling(){
-  if(liveTimer){ clearInterval(liveTimer); liveTimer=null; }
-}
-
-function showKeyPrompt(){
-  const msg = `<div class="err" style="background:rgba(26,163,74,0.08);border-color:rgba(26,163,74,0.3);color:var(--wc)">
-    <strong>Add your API key to see live data:</strong><br>
-    1. Register free at <a href="https://dashboard.api-sports.io/register" target="_blank" style="color:inherit">dashboard.api-sports.io</a><br>
-    2. In <code style="background:rgba(0,0,0,0.2);padding:1px 5px;border-radius:3px">index.html</code>, replace <code style="background:rgba(0,0,0,0.2);padding:1px 5px;border-radius:3px">YOUR_API_KEY</code> with your key
-  </div>`;
-  ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
-    .forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=msg; });
+function setLastUpdated(){
+  const el = document.getElementById('last-updated');
+  if(el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const badge = document.getElementById('req-badge');
+  if(badge){ badge.textContent = 'Free · No limit'; badge.className='req-badge'; }
 }
 
-function showLimitWarning(){
-  const msg = `<div class="err" style="background:rgba(217,119,6,0.08);border-color:rgba(217,119,6,0.3);color:var(--draw)">
-    ⚠️ Daily limit of 100 requests reached. Data will resume updating after midnight UTC.
-    <br>Last data shown is from your most recent refresh.
-  </div>`;
-  ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
-    .forEach(id=>{ const el=document.getElementById(id); if(el&&el.innerHTML.includes('loading')) el.innerHTML=msg; });
+function getScore(m){
+  const s = m.score?.ft || m.score || m.result || {};
+  if(Array.isArray(s)) return { h: s[0]??'–', a: s[1]??'–' };
+  return { h: s.home??s.homeGoals??s.home_score??'–', a: s.away??s.awayGoals??s.away_score??'–' };
 }
+function getTeams(m){
+  const h = m.team1||m.home_team||m.homeTeam?.name||m.home||'TBD';
+  const a = m.team2||m.away_team||m.awayTeam?.name||m.away||'TBD';
+  return { h, a };
+}
+function getGroup(m){ return m.group||m.group_name||m.stage||''; }
+function getDate(m){ return m.date||m.datetime||m.kickoff||m.fixture?.date||''; }
 
-function buildAFScorers(fixtures){
+function buildScorers(finished){
   const el = document.getElementById('wc-scorers');
   const counts = {};
-  fixtures.forEach(f=>{
-    (f.events||[]).forEach(e=>{
-      if(e.type!=='Goal'||e.detail==='Own Goal') return;
-      const k = e.player.name;
-      const team = e.team.name;
-      if(!counts[k]) counts[k]={name:k,team,goals:0};
-      counts[k].goals++;
+  finished.forEach(m=>{
+    const {h,a} = getTeams(m);
+    (m.goals||m.scorers||m.events?.filter(e=>e.type==='goal')||[]).forEach(g=>{
+      const name = g.name||g.player||g.scorer||g.player_name;
+      if(!name) return;
+      const team = (g.side===1||g.team===1||g.team===h) ? h : a;
+      if(!counts[name]) counts[name]={name,team,goals:0};
+      counts[name].goals++;
     });
   });
   const sorted = Object.values(counts).sort((a,b)=>b.goals-a.goals).slice(0,5);
   if(!sorted.length){
-    el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goals scored yet</div>';return;
+    el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No scorer data yet — updates after goals are recorded</div>';return;
   }
   el.innerHTML=`<div class="panel">${sorted.map((s,i)=>`
     <div class="scorer-row">
@@ -670,13 +606,13 @@ function buildAFScorers(fixtures){
     </div>`).join('')}</div>`;
 }
 
-function buildAFGoalsChart(finished){
+function buildGoalsChart(finished, groups){
   const el = document.getElementById('wc-goals-chart');
   const gmap = {};
-  finished.forEach(f=>{
-    const grp = f.league.round||'Other';
-    const g = (f.goals.home||0)+(f.goals.away||0);
-    gmap[grp] = (gmap[grp]||0)+g;
+  finished.forEach(m=>{
+    const grp = getGroup(m)||'Other';
+    const {h,a} = getScore(m);
+    gmap[grp] = (gmap[grp]||0)+(+h||0)+(+a||0);
   });
   const entries = Object.entries(gmap).sort((a,b)=>b[1]-a[1]).slice(0,8);
   if(!entries.length){el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goals yet</div>';return}
@@ -688,79 +624,117 @@ function buildAFGoalsChart(finished){
     </div>`).join('')}</div>`;
 }
 
-function buildAFOverviewResults(matches){
+function buildOverviewResults(matches){
   const el = document.getElementById('wc-overview-results');
   if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No matches played yet</div>';return}
-  el.innerHTML=`<div class="three-col">${matches.map(f=>afMatchCard(f)).join('')}</div>`;
+  el.innerHTML=`<div class="three-col">${matches.map(m=>wcCard(m)).join('')}</div>`;
 }
 
-function buildAFGroups(standingsData){
+function buildGroups(groups, games){
   const el = document.getElementById('wc-groups-inner');
-  if(!standingsData||!standingsData.length){el.innerHTML='<div class="err">Group data not yet available</div>';return}
-  const groups = standingsData[0]?.league?.standings||[];
-  if(!groups.length){el.innerHTML='<div class="err">No group data yet</div>';return}
-  const cards = groups.map(group=>{
-    const rows = group.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
-      `<div class="grow"><div class="grow-team ${i<2&&t.all.played>0?'q':''}">${tf(t.team.name)} ${t.team.name}</div>
-       <span class="grow-n">${t.all.played}</span><span class="grow-n">${t.all.win}</span><span class="grow-n">${t.all.lose}</span><span class="grow-pts">${t.points}</span></div>`
-    ).join('');
-    const gname = group[0]?.group||'Group';
+  if(!groups.length){
+    buildGroupsFromGames(games);
+    return;
+  }
+  const cards = groups.map(g=>{
+    const gname = g.name||g.group||g.group_name||'Group';
+    const teams = g.teams||g.standings||g.table||[];
+    const rows = teams.map((t,i)=>{
+      const name = t.team||t.name||t.team_name||t.team?.name||'?';
+      const p=t.played||t.p||t.matchesPlayed||0;
+      const w=t.won||t.w||t.wins||0;
+      const l=t.lost||t.l||t.losses||0;
+      const pts=t.points||t.pts||0;
+      return (i===2?'<div class="qual-line"></div>':'')+
+        `<div class="grow"><div class="grow-team ${i<2&&p>0?'q':''}">${tf(name)} ${name}</div>
+         <span class="grow-n">${p}</span><span class="grow-n">${w}</span><span class="grow-n">${l}</span><span class="grow-pts">${pts}</span></div>`;
+    }).join('');
     return`<div class="group-card">
-      <div class="group-head"><span class="group-head-name">${gname}</span><span class="group-head-info">${group[0]?.all?.played||0} of 3 played</span></div>
+      <div class="group-head"><span class="group-head-name">${gname}</span></div>
       <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>
       ${rows}</div>`;
   }).join('');
   el.innerHTML=`<div class="groups-grid">${cards}</div>`;
 }
 
-function buildAFResults(matches){
-  const el = document.getElementById('wc-results-inner');
-  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No results yet</div>';return}
-  el.innerHTML=`<div class="three-col">${matches.map(f=>afMatchCard(f)).join('')}</div>`;
+function buildGroupsFromGames(games){
+  const el = document.getElementById('wc-groups-inner');
+  const gmap = {};
+  games.forEach(m=>{
+    const grp = getGroup(m); if(!grp) return;
+    const {h,a} = getTeams(m);
+    if(!gmap[grp]) gmap[grp]={};
+    [h,a].forEach(t=>{ if(t&&t!=='TBD'&&!gmap[grp][t]) gmap[grp][t]={p:0,w:0,d:0,l:0,pts:0}; });
+    if(m.score?.ft||m.result){
+      const sc = getScore(m);
+      const hs=+sc.h||0, as=+sc.a||0;
+      const t1=gmap[grp][h], t2=gmap[grp][a];
+      if(!t1||!t2) return;
+      t1.p++;t2.p++;
+      if(hs>as){t1.w++;t1.pts+=3;t2.l++}
+      else if(hs<as){t2.w++;t2.pts+=3;t1.l++}
+      else{t1.d++;t2.d++;t1.pts++;t2.pts++}
+    }
+  });
+  const groups = Object.entries(gmap).sort(([a],[b])=>a.localeCompare(b));
+  if(!groups.length){el.innerHTML='<div class="err">No group data yet</div>';return}
+  const cards = groups.map(([gname,teams])=>{
+    const sorted = Object.entries(teams).map(([n,s])=>({n,...s})).sort((a,b)=>b.pts-a.pts);
+    const rows = sorted.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
+      `<div class="grow"><div class="grow-team ${i<2&&t.p>0?'q':''}">${tf(t.n)} ${t.n}</div>
+       <span class="grow-n">${t.p}</span><span class="grow-n">${t.w}</span><span class="grow-n">${t.l}</span><span class="grow-pts">${t.pts}</span></div>`
+    ).join('');
+    return`<div class="group-card">
+      <div class="group-head"><span class="group-head-name">${gname}</span></div>
+      <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>${rows}</div>`;
+  }).join('');
+  el.innerHTML=`<div class="groups-grid">${cards}</div>`;
 }
 
-function buildAFFixtures(matches){
+function buildResults(matches){
+  const el = document.getElementById('wc-results-inner');
+  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No results yet</div>';return}
+  el.innerHTML=`<div class="three-col">${matches.map(m=>wcCard(m)).join('')}</div>`;
+}
+
+function buildFixtures(matches){
   const el = document.getElementById('wc-fixtures-inner');
   if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No upcoming fixtures</div>';return}
-  const rows = matches.map(f=>`
-    <div class="fix-row">
-      <div class="fix-teams">${tf(f.teams.home.name)} <span>${tf(f.teams.home.name)} ${f.teams.home.name}</span>
-        <span class="fix-vs">vs</span>
-        ${tf(f.teams.away.name)} <span>${tf(f.teams.away.name)} ${f.teams.away.name}</span></div>
+  const rows = matches.map(m=>{
+    const {h,a} = getTeams(m);
+    const d = getDate(m);
+    return`<div class="fix-row">
+      <div class="fix-teams">${tf(h)} <span>${tf(h)} ${h}</span><span class="fix-vs">vs</span>${tf(a)} <span>${tf(a)} ${a}</span></div>
       <div class="fix-right">
-        <div class="fix-date">${fShort(f.fixture.date)} · ${f.league.round||''}</div>
-        <div class="fix-time">${fTime(f.fixture.date)}</div>
-      </div>
-    </div>`).join('');
+        <div class="fix-date">${d?fShort(d):''} · ${getGroup(m)}</div>
+        <div class="fix-time">${d?fTime(d):'TBD'}</div>
+      </div></div>`;
+  }).join('');
   el.innerHTML=`<div class="fix-panel">${rows}</div>`;
 }
 
-function afMatchCard(f){
-  const status = f.fixture.status.short;
-  const isLive = ['1H','HT','2H','ET','BT','P','INT'].includes(status);
-  const isDone = ['FT','AET','PEN'].includes(status);
-  const hs = f.goals.home ?? '–';
-  const as = f.goals.away ?? '–';
-  const hw = isDone && hs > as;
-  const aw = isDone && as > hs;
-  const draw = isDone && hs === as;
-  const elapsed = f.fixture.status.elapsed;
-  let pill = '';
-  if(isLive) pill = `<span class="rpill" style="background:rgba(232,0,45,0.15);color:var(--f1);animation:blink 1.5s infinite">${elapsed?elapsed+"'":status}</span>`;
-  else if(draw) pill = `<span class="rpill rpill-d">Draw</span>`;
-  else if(isDone) pill = `<span class="rpill rpill-ft">FT</span>`;
-  else pill = `<span class="rpill" style="background:var(--surface2);color:var(--muted2)">${fTime(f.fixture.date)}</span>`;
+function wcCard(m){
+  const {h,a} = getTeams(m);
+  const sc = getScore(m);
+  const hs=sc.h, as=sc.a;
+  const isLive = m.status==='live'||m.status==='1H'||m.status==='2H'||m.status==='HT';
+  const isDone = m.status==='finished'||m.status==='FT'||m.score?.ft||m.result;
+  const hw=+hs>+as, aw=+as>+hs, draw=+hs===+as&&hs!=='–';
+  let pill='';
+  if(isLive) pill=`<span class="rpill" style="background:rgba(232,0,45,0.15);color:var(--f1)">${m.minute||m.elapsed||'LIVE'}'</span>`;
+  else if(draw) pill=`<span class="rpill rpill-d">Draw</span>`;
+  else if(isDone) pill=`<span class="rpill rpill-ft">FT</span>`;
+  else { const d=getDate(m); pill=`<span class="rpill" style="background:var(--surface2);color:var(--muted2)">${d?fTime(d):'TBD'}</span>`; }
   return`<div class="match-card" ${isLive?'style="border-color:rgba(232,0,45,0.4)"':''}>
-    <div class="match-top"><span>${f.league.round||''} · ${fShort(f.fixture.date)}</span>${pill}</div>
+    <div class="match-top"><span>${getGroup(m)} · ${getDate(m)?fShort(getDate(m)):''}</span>${pill}</div>
     <div class="match-body">
-      <div class="mt"><span class="mt-flag">${tf(f.teams.home.name)}</span><span class="mt-name">${tf(f.teams.home.name)} ${f.teams.home.name}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(h)}</span><span class="mt-name">${tf(h)} ${h}</span></div>
       <div class="score-box"><span class="${hw?'sw':'sl'}">${hs}</span><span class="ssep">–</span><span class="${aw?'sw':'sl'}">${as}</span></div>
-      <div class="mt"><span class="mt-flag">${tf(f.teams.away.name)}</span><span class="mt-name">${tf(f.teams.away.name)} ${f.teams.away.name}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(a)}</span><span class="mt-name">${tf(a)} ${a}</span></div>
     </div></div>`;
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────
-updateReqBadge();
 loadF1();
 loadWC();
 </script>
