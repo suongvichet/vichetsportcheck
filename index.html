@@ -55,7 +55,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px
 .page{display:none;padding:24px;max-width:1100px;margin:0 auto}
 .page.active{display:block}
 
-/* ── F1 PAGE (same as before, compact) ── */
+/* ── F1 PAGE ── */
 .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
 .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .scard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -198,21 +198,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px
 .wc-spin{border-top-color:var(--wc)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:var(--radius);padding:14px 16px;color:#ef4444;font-size:13px;margin-bottom:12px}
-.setup-box{background:var(--wcdim);border:1px solid rgba(22,163,74,0.3);border-radius:var(--radius);padding:14px 16px;color:var(--wc2);font-size:13px;line-height:1.9;margin-bottom:16px}
-.dark .setup-box{color:#4ade80}
-.setup-box code{background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:3px;font-size:12px}
-.setup-box a{color:inherit;text-decoration:underline}
-.sample-note{font-size:12px;color:var(--muted);margin-bottom:12px}
 .refresh-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .refresh-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all 0.15s}
 .refresh-btn:hover{background:var(--surface3);border-color:var(--wc)}
 .refresh-btn:disabled{opacity:0.45;cursor:not-allowed}
 .refresh-btn.spinning svg{animation:spin 0.7s linear infinite}
 .req-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--wcdim);color:var(--wc)}
-.req-badge.warn{background:rgba(217,119,6,0.15);color:var(--draw)}
-.req-badge.danger{background:var(--lossbg);color:var(--loss)}
 .last-updated{font-size:11px;color:var(--muted2);margin-left:auto}
-.live-banner{background:rgba(232,0,45,0.08);border:1px solid rgba(232,0,45,0.25);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--f1);display:flex;align-items:center;gap:7px;margin-bottom:14px;display:none}
+.live-banner{background:rgba(232,0,45,0.08);border:1px solid rgba(232,0,45,0.25);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--f1);display:none;align-items:center;gap:7px;margin-bottom:14px}
 .live-banner.show{display:flex}
 
 footer{text-align:center;padding:2rem 1rem;color:var(--muted2);font-size:11px;border-top:1px solid var(--border);margin-top:2rem}
@@ -302,8 +295,8 @@ footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M20 9A9 9 0 0 0 5.64 5.64M4 15a9 9 0 0 0 14.36 3.36"/></svg>
       <span>Refresh scores</span>
     </button>
-    <span class="req-badge" id="req-badge">Free · No limit</span>
-    <span class="last-updated" id="last-updated">Not yet updated</span>
+    <span class="req-badge" id="req-badge">ESPN · Free · No key</span>
+    <span class="last-updated" id="last-updated">Loading…</span>
   </div>
 
   <!-- OVERVIEW -->
@@ -348,7 +341,7 @@ footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 
 <footer>
   F1 via <a href="https://github.com/jolpica/jolpica-f1" target="_blank">Jolpica F1 API</a> ·
-  World Cup via <a href="https://worldcup26.ir" target="_blank">worldcup26.ir (free, real-time)</a> ·
+  World Cup via <a href="https://www.espn.com" target="_blank">ESPN (unofficial, free)</a> ·
   Hosted on GitHub Pages
 </footer>
 
@@ -411,14 +404,97 @@ const ctryCode={
   'Bolivia':'BO','Croatia':'HR','Serbia':'RS','Romania':'RO','Greece':'GR',
   'Turkey':'TR','Ireland':'IE','Norway':'NO','Iceland':'IS','Russia':'RU'
 };
-function ctryFlag(name){if(!name)return'';const c=ctryCode[name];return c?flagOf(c)+'\u202f':''}
+function ctryFlag(name){if(!name)return'';const c=ctryCode[name];return c?flagOf(c)+' ':''}
 
-const tEmoji={USA:'🇺🇸',Mexico:'🇲🇽',Brazil:'🇧🇷',Argentina:'🇦🇷',France:'🇫🇷',
-  Germany:'🇩🇪',Spain:'🇪🇸',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Japan:'🇯🇵',Morocco:'🇲🇦',Croatia:'🇭🇷',
-  Denmark:'🇩🇰',Portugal:'🇵🇹',Netherlands:'🇳🇱',Italy:'🇮🇹',Serbia:'🇷🇸',
-  Chile:'🇨🇱',Ecuador:'🇪🇨',Panama:'🇵🇦',Bolivia:'🇧🇴',Canada:'🇨🇦',
-  Belgium:'🇧🇪',Uruguay:'🇺🇾',Colombia:'🇨🇴',Senegal:'🇸🇳',Thailand:'🇹🇭'};
-function tf(n){return tEmoji[n]||'🏳'}
+// ── Expanded team emoji map for all WC 2026 teams ──────────────────────
+const tEmoji={
+  // North & Central America
+  'USA':'🇺🇸','United States':'🇺🇸',
+  'Mexico':'🇲🇽',
+  'Canada':'🇨🇦',
+  'Costa Rica':'🇨🇷',
+  'Honduras':'🇭🇳',
+  'Jamaica':'🇯🇲',
+  'Panama':'🇵🇦',
+  // South America
+  'Brazil':'🇧🇷',
+  'Argentina':'🇦🇷',
+  'Uruguay':'🇺🇾',
+  'Colombia':'🇨🇴',
+  'Ecuador':'🇪🇨',
+  'Chile':'🇨🇱',
+  'Paraguay':'🇵🇾',
+  'Venezuela':'🇻🇪',
+  'Bolivia':'🇧🇴',
+  'Peru':'🇵🇪',
+  // Europe
+  'France':'🇫🇷',
+  'Germany':'🇩🇪',
+  'Spain':'🇪🇸',
+  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Portugal':'🇵🇹',
+  'Netherlands':'🇳🇱',
+  'Belgium':'🇧🇪',
+  'Italy':'🇮🇹',
+  'Croatia':'🇭🇷',
+  'Denmark':'🇩🇰',
+  'Serbia':'🇷🇸',
+  'Switzerland':'🇨🇭',
+  'Austria':'🇦🇹',
+  'Poland':'🇵🇱',
+  'Ukraine':'🇺🇦',
+  'Romania':'🇷🇴',
+  'Turkey':'🇹🇷','Türkiye':'🇹🇷',
+  'Slovakia':'🇸🇰',
+  'Albania':'🇦🇱',
+  'Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+  'Hungary':'🇭🇺',
+  'Greece':'🇬🇷',
+  'Czech Republic':'🇨🇿','Czechia':'🇨🇿',
+  'Norway':'🇳🇴',
+  'Sweden':'🇸🇪',
+  'Finland':'🇫🇮',
+  'Iceland':'🇮🇸',
+  'Ireland':'🇮🇪',
+  // Africa
+  'Morocco':'🇲🇦',
+  'Senegal':'🇸🇳',
+  'Nigeria':'🇳🇬',
+  'Egypt':'🇪🇬',
+  'Cameroon':'🇨🇲',
+  "Côte d'Ivoire":'🇨🇮',"Ivory Coast":'🇨🇮',
+  'Mali':'🇲🇱',
+  'South Africa':'🇿🇦',
+  'Algeria':'🇩🇿',
+  'Tunisia':'🇹🇳',
+  'Ghana':'🇬🇭',
+  'DR Congo':'🇨🇩',
+  'Tanzania':'🇹🇿',
+  // Asia
+  'Japan':'🇯🇵',
+  'South Korea':'🇰🇷','Korea Republic':'🇰🇷',
+  'Australia':'🇦🇺',
+  'Iran':'🇮🇷',
+  'Saudi Arabia':'🇸🇦',
+  'Qatar':'🇶🇦',
+  'Indonesia':'🇮🇩',
+  'Uzbekistan':'🇺🇿',
+  'Jordan':'🇯🇴',
+  'Iraq':'🇮🇶',
+  'Oman':'🇴🇲',
+  // Pacific
+  'New Zealand':'🇳🇿',
+  // Default
+  'TBD':'🏳'
+};
+function tf(n){
+  if(!n) return '🏳';
+  if(tEmoji[n]) return tEmoji[n];
+  // partial match
+  for(const k in tEmoji) if(n.includes(k)||k.includes(n)) return tEmoji[k];
+  return '🏳';
+}
 
 function fDate(s){return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
 function fShort(s){return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
@@ -493,13 +569,25 @@ async function f1Schedule(){
   }catch(e){el.innerHTML=`<div class="err">Could not load schedule. ${e.message}</div>`}
 }
 
-// ── WORLD CUP — worldcup26.ir (free, no key, real-time) ───────────────
-const WC_GAMES   = 'https://worldcup26.ir/get/games';
-const WC_GROUPS  = 'https://worldcup26.ir/get/groups';
+// ── WORLD CUP — ESPN Unofficial API (free, no key, CORS-supported) ─────
+//
+//  worldcup26.ir was the previous source but caused CORS failures in browsers.
+//  ESPN's unofficial API is widely used, free, and supports cross-origin requests.
+//
+const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WC';
+const ESPN_V2   = 'https://site.api.espn.com/apis/v2/sports/soccer/FIFA.WC';
 
-async function loadWC(){ await refreshWC(); }
+// WC 2026 runs June 11 – July 19. Fetch one call per week to get all matches.
+const WC_WEEKS = [
+  '20260611','20260618','20260625',
+  '20260702','20260709','20260716'
+];
 
-async function manualRefresh(){
+let _liveTimer = null; // auto-refresh handle when matches are live
+
+async function loadWC() { await refreshWC(); }
+
+async function manualRefresh() {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
   btn.classList.add('spinning');
@@ -510,93 +598,175 @@ async function manualRefresh(){
   btn.querySelector('span').textContent = 'Refresh scores';
 }
 
-async function refreshWC(){
-  try{
-    const [gamesRes, groupsRes] = await Promise.all([
-      fetch(WC_GAMES).then(r=>r.json()),
-      fetch(WC_GROUPS).then(r=>r.json())
+async function refreshWC() {
+  try {
+    // Fetch every week of the tournament in parallel (+ leaders for top scorers)
+    const [weekResults, standRes, leadersRes] = await Promise.all([
+      Promise.all(WC_WEEKS.map(d =>
+        fetch(`${ESPN_BASE}/scoreboard?dates=${d}&limit=50`)
+          .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
+          .catch(() => ({ events: [] }))
+      )),
+      fetch(`${ESPN_V2}/standings`).then(r => r.json()).catch(() => null),
+      fetch(`${ESPN_V2}/leaders`).then(r => r.json()).catch(() => null)
     ]);
 
-    const games   = Array.isArray(gamesRes)  ? gamesRes  : gamesRes.data  || gamesRes.games  || [];
-    const groups  = Array.isArray(groupsRes) ? groupsRes : groupsRes.data || groupsRes.groups || [];
+    // Flatten and deduplicate events by ID
+    const seen = new Set();
+    const allEvents = weekResults
+      .flatMap(r => r.events || [])
+      .filter(ev => ev.id && !seen.has(ev.id) && seen.add(ev.id));
 
-    const finished = games.filter(m=> m.status==='finished' || m.status==='FT' || m.score?.ft || m.result);
-    const live     = games.filter(m=> m.status==='live' || m.status==='1H' || m.status==='2H' || m.status==='HT');
-    const upcoming = games.filter(m=> m.status==='scheduled' || m.status==='NS' || (!m.score?.ft && !m.result && !live.includes(m)));
+    // Normalise to a consistent shape
+    const games    = allEvents.map(normalizeESPN);
+    const finished = games.filter(m => m.status === 'FT');
+    const live     = games.filter(m => m.status === 'live');
+    const upcoming = games.filter(m => m.status === 'NS');
 
-    const totalGoals = finished.reduce((a,m)=>{
-      const s = m.score?.ft || m.score || m.result || {};
-      const h = s[0]??s.home??s.homeGoals??0;
-      const aw = s[1]??s.away??s.awayGoals??0;
-      return a + (+h||0) + (+aw||0);
+    // ── Header stats ────────────────────────────────────────────────────
+    const totalGoals = finished.reduce((a, m) => {
+      const s = getScore(m);
+      return a + (+s.h || 0) + (+s.a || 0);
     }, 0);
+    document.getElementById('wc-goals').textContent  = totalGoals || '–';
+    document.getElementById('wc-played').textContent = finished.length || '–';
+    document.getElementById('wc-gpg').textContent    = finished.length
+      ? +(totalGoals / finished.length).toFixed(1) : '–';
 
-    document.getElementById('wc-goals').textContent   = totalGoals || '–';
-    document.getElementById('wc-played').textContent  = finished.length || '–';
-    document.getElementById('wc-gpg').textContent     = finished.length ? +(totalGoals/finished.length).toFixed(1) : '–';
-
+    // ── Live banner + auto-refresh ───────────────────────────────────────
     const liveBanner = document.getElementById('live-banner');
-    if(live.length > 0){
+    clearInterval(_liveTimer);
+    if (live.length > 0) {
       liveBanner.classList.add('show');
       liveBanner.innerHTML = `<span style="width:8px;height:8px;background:var(--f1);border-radius:50%;animation:blink 1s infinite;display:inline-block"></span>
-        🔴 ${live.length} match${live.length>1?'es':''} live now — press Refresh to update`;
+        &nbsp;🔴 ${live.length} match${live.length > 1 ? 'es' : ''} live now — auto-refreshing every 60s`;
+      _liveTimer = setInterval(refreshWC, 60000);
     } else {
       liveBanner.classList.remove('show');
     }
 
-    buildScorers(finished);
-    buildGoalsChart(finished, groups);
-    buildOverviewResults([...live,...finished].slice(-3).reverse());
-    buildGroups(groups, games);
-    buildResults([...live,...finished.slice(-9).reverse()].slice(0,9));
-    buildFixtures(upcoming.slice(0,10));
+    // ── Build each section ───────────────────────────────────────────────
+    buildScorers(leadersRes, finished);
+    buildGoalsChart(finished);
+    buildOverviewResults([...live, ...finished].slice(-3).reverse());
+    buildGroupsESPN(standRes, games);
+    buildResults([...live, ...finished.slice().reverse()].slice(0, 9));
+    buildFixtures(upcoming.slice(0, 12));
     setLastUpdated();
 
-  }catch(e){
-    const msg = `<div class="err">⚠️ Could not load data: ${e.message}<br><small>Check your internet connection and try refreshing again.</small></div>`;
+  } catch (e) {
+    console.error('WC error:', e);
+    const msg = `<div class="err">⚠️ Could not load World Cup data: ${e.message}<br><small>Check your connection and try refreshing.</small></div>`;
     ['wc-scorers','wc-goals-chart','wc-overview-results','wc-groups-inner','wc-results-inner','wc-fixtures-inner']
-      .forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=msg; });
+      .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = msg; });
   }
 }
 
-function setLastUpdated(){
+// Normalise an ESPN event into the shape expected by the display helpers below
+function normalizeESPN(ev) {
+  const comp  = (ev.competitions || [])[0] || {};
+  const stype = (comp.status || {}).type || {};
+  const comps = comp.competitors || [];
+
+  const home = comps.find(c => c.homeAway === 'home') || comps[0] || {};
+  const away = comps.find(c => c.homeAway === 'away') || comps[1] || {};
+
+  const isComplete = !!stype.completed;
+  const isLive     = !isComplete && stype.state === 'in';
+
+  const hs = parseInt(home.score) || 0;
+  const as_= parseInt(away.score) || 0;
+
+  // Extract group label from ESPN notes
+  const noteText = ((comp.notes || []).map(n => n.text || '').join(' ')).trim();
+  const grpMatch = noteText.match(/Group\s+([A-L])/i);
+  const group    = grpMatch ? `Group ${grpMatch[1].toUpperCase()}` : (noteText || 'WC 2026');
+
+  return {
+    // Fields used by getTeams()
+    team1: home.team?.displayName || 'TBD',
+    team2: away.team?.displayName || 'TBD',
+    // Fields used by getDate()
+    date:  ev.date || comp.date,
+    // Fields used by getGroup()
+    group,
+    // Status — matching values the display helpers expect
+    status:  isComplete ? 'FT' : isLive ? 'live' : 'NS',
+    minute:  (comp.status || {}).displayClock || '',
+    elapsed: (comp.status || {}).displayClock || '',
+    // Score in the shape getScore() can unwrap
+    score:  isComplete ? { ft: [hs, as_] } : (isLive ? [hs, as_] : null),
+    result: isComplete ? { home: hs, away: as_ } : null,
+    goals:  [] // detailed scorer events not in the scoreboard endpoint
+  };
+}
+
+function setLastUpdated() {
   const el = document.getElementById('last-updated');
-  if(el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  const badge = document.getElementById('req-badge');
-  if(badge){ badge.textContent = 'Free · No limit'; badge.className='req-badge'; }
+  if (el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 
-function getScore(m){
+// ── Data accessor helpers (compatible with normalizeESPN output) ─────────
+function getScore(m) {
   const s = m.score?.ft || m.score || m.result || {};
-  if(Array.isArray(s)) return { h: s[0]??'–', a: s[1]??'–' };
-  return { h: s.home??s.homeGoals??s.home_score??'–', a: s.away??s.awayGoals??s.away_score??'–' };
+  if (Array.isArray(s)) return { h: s[0] ?? '–', a: s[1] ?? '–' };
+  return { h: s.home ?? s.homeGoals ?? s.home_score ?? '–', a: s.away ?? s.awayGoals ?? s.away_score ?? '–' };
 }
-function getTeams(m){
-  const h = m.team1||m.home_team||m.homeTeam?.name||m.home||'TBD';
-  const a = m.team2||m.away_team||m.awayTeam?.name||m.away||'TBD';
-  return { h, a };
+function getTeams(m) {
+  return {
+    h: m.team1 || m.home_team || m.homeTeam?.name || m.home || 'TBD',
+    a: m.team2 || m.away_team || m.awayTeam?.name || m.away || 'TBD'
+  };
 }
-function getGroup(m){ return m.group||m.group_name||m.stage||''; }
-function getDate(m){ return m.date||m.datetime||m.kickoff||m.fixture?.date||''; }
+function getGroup(m) { return m.group || m.group_name || m.stage || ''; }
+function getDate(m)  { return m.date || m.datetime || m.kickoff || ''; }
 
-function buildScorers(finished){
+// ── Top scorers (ESPN leaders endpoint) ─────────────────────────────────
+function buildScorers(leadersRes, finished) {
   const el = document.getElementById('wc-scorers');
+
+  // Try ESPN leaders first
+  if (leadersRes) {
+    try {
+      const goalLeaders = (leadersRes.leaders || []).find(l =>
+        l.name === 'goals' || l.abbreviation === 'G' || (l.displayName || '').toLowerCase().includes('goal')
+      );
+      const list = goalLeaders?.leaders || [];
+      if (list.length) {
+        el.innerHTML = `<div class="panel">${list.slice(0,5).map((s,i)=>`
+          <div class="scorer-row">
+            <div class="scorer-left">
+              <div class="scorer-rank ${i===0?'r1':''}">${i+1}</div>
+              <div>
+                <div class="scorer-name">${tf(s.athlete?.team?.displayName||'')} ${s.athlete?.displayName||'–'}</div>
+                <div class="scorer-team">${s.athlete?.team?.displayName||''}</div>
+              </div>
+            </div>
+            <div class="scorer-goals">${s.displayValue || s.value} ⚽</div>
+          </div>`).join('')}</div>`;
+        return;
+      }
+    } catch(_) {}
+  }
+
+  // Fallback: derive from match events (goals array in normalised data)
   const counts = {};
-  finished.forEach(m=>{
+  finished.forEach(m => {
     const {h,a} = getTeams(m);
-    (m.goals||m.scorers||m.events?.filter(e=>e.type==='goal')||[]).forEach(g=>{
-      const name = g.name||g.player||g.scorer||g.player_name;
-      if(!name) return;
-      const team = (g.side===1||g.team===1||g.team===h) ? h : a;
-      if(!counts[name]) counts[name]={name,team,goals:0};
+    (m.goals || []).forEach(g => {
+      const name = g.name || g.player || g.scorer;
+      if (!name) return;
+      if (!counts[name]) counts[name] = { name, team: g.side === 1 ? h : a, goals: 0 };
       counts[name].goals++;
     });
   });
-  const sorted = Object.values(counts).sort((a,b)=>b.goals-a.goals).slice(0,5);
-  if(!sorted.length){
-    el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No scorer data yet — updates after goals are recorded</div>';return;
+  const sorted = Object.values(counts).sort((a,b) => b.goals - a.goals).slice(0,5);
+
+  if (!sorted.length) {
+    el.innerHTML = '<div class="panel" style="padding:14px;color:var(--muted);font-size:13px;text-align:center">Scorer data updates as goals are recorded</div>';
+    return;
   }
-  el.innerHTML=`<div class="panel">${sorted.map((s,i)=>`
+  el.innerHTML = `<div class="panel">${sorted.map((s,i) => `
     <div class="scorer-row">
       <div class="scorer-left">
         <div class="scorer-rank ${i===0?'r1':''}">${i+1}</div>
@@ -606,131 +776,187 @@ function buildScorers(finished){
     </div>`).join('')}</div>`;
 }
 
-function buildGoalsChart(finished, groups){
+// ── Goals-by-group chart ─────────────────────────────────────────────────
+function buildGoalsChart(finished) {
   const el = document.getElementById('wc-goals-chart');
   const gmap = {};
-  finished.forEach(m=>{
-    const grp = getGroup(m)||'Other';
+  finished.forEach(m => {
+    const grp = getGroup(m) || 'Other';
     const {h,a} = getScore(m);
-    gmap[grp] = (gmap[grp]||0)+(+h||0)+(+a||0);
+    gmap[grp] = (gmap[grp] || 0) + (+h||0) + (+a||0);
   });
-  const entries = Object.entries(gmap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  if(!entries.length){el.innerHTML='<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goals yet</div>';return}
-  const max = Math.max(...entries.map(e=>e[1]));
-  el.innerHTML=`<div class="panel">${entries.map(([grp,g])=>`
+  const entries = Object.entries(gmap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  if (!entries.length) {
+    el.innerHTML = '<div class="panel" style="padding:14px;color:var(--muted);font-size:13px">No goals yet</div>';
+    return;
+  }
+  const max = Math.max(...entries.map(e => e[1]));
+  el.innerHTML = `<div class="panel">${entries.map(([grp,g]) => `
     <div class="bar-row">
       <div class="bar-lbl"><span>${grp}</span><span>${g}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.round(g/max*100)}%"></div></div>
     </div>`).join('')}</div>`;
 }
 
-function buildOverviewResults(matches){
+// ── Overview: last 3 results ─────────────────────────────────────────────
+function buildOverviewResults(matches) {
   const el = document.getElementById('wc-overview-results');
-  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No matches played yet</div>';return}
-  el.innerHTML=`<div class="three-col">${matches.map(m=>wcCard(m)).join('')}</div>`;
-}
-
-function buildGroups(groups, games){
-  const el = document.getElementById('wc-groups-inner');
-  if(!groups.length){
-    buildGroupsFromGames(games);
+  if (!matches.length) {
+    el.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:13px">No matches played yet</div>';
     return;
   }
-  const cards = groups.map(g=>{
-    const gname = g.name||g.group||g.group_name||'Group';
-    const teams = g.teams||g.standings||g.table||[];
-    const rows = teams.map((t,i)=>{
-      const name = t.team||t.name||t.team_name||t.team?.name||'?';
-      const p=t.played||t.p||t.matchesPlayed||0;
-      const w=t.won||t.w||t.wins||0;
-      const l=t.lost||t.l||t.losses||0;
-      const pts=t.points||t.pts||0;
-      return (i===2?'<div class="qual-line"></div>':'')+
-        `<div class="grow"><div class="grow-team ${i<2&&p>0?'q':''}">${tf(name)} ${name}</div>
-         <span class="grow-n">${p}</span><span class="grow-n">${w}</span><span class="grow-n">${l}</span><span class="grow-pts">${pts}</span></div>`;
-    }).join('');
-    return`<div class="group-card">
-      <div class="group-head"><span class="group-head-name">${gname}</span></div>
-      <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>
-      ${rows}</div>`;
-  }).join('');
-  el.innerHTML=`<div class="groups-grid">${cards}</div>`;
+  el.innerHTML = `<div class="three-col">${matches.map(m => wcCard(m)).join('')}</div>`;
 }
 
-function buildGroupsFromGames(games){
+// ── Group tables ─────────────────────────────────────────────────────────
+function buildGroupsESPN(standRes, games) {
+  const el = document.getElementById('wc-groups-inner');
+
+  // Try ESPN standings response first
+  if (standRes) {
+    try {
+      // ESPN WC standings may nest groups under .children or .standings.groups
+      let groupArr = standRes.children
+        || standRes.standings?.groups
+        || (standRes.groups ? standRes.groups : null);
+
+      if (!groupArr && standRes.standings?.entries?.length) {
+        // Flat entries — group by note.text
+        const gmap = {};
+        (standRes.standings.entries || []).forEach(e => {
+          const gname = e.note?.text || e.group || 'Group';
+          if (!gmap[gname]) gmap[gname] = [];
+          gmap[gname].push(e);
+        });
+        groupArr = Object.entries(gmap).map(([name, entries]) => ({ name, standings: { entries } }));
+      }
+
+      if (groupArr && groupArr.length) {
+        const getStat = (stats, name) => {
+          const s = (stats || []).find(s => s.name === name || s.abbreviation === name);
+          return s ? (+s.value || 0) : 0;
+        };
+
+        const cards = groupArr.map(g => {
+          const gname    = g.name || g.group || 'Group';
+          const entries  = g.standings?.entries || g.entries || g.teams || [];
+          const sorted   = [...entries].sort((a,b) =>
+            getStat(b.stats,'points') - getStat(a.stats,'points')
+          );
+          const rows = sorted.map((t,i) => {
+            const name = t.team?.displayName || t.team?.name || t.name || '?';
+            const p    = getStat(t.stats,'gamesPlayed') || getStat(t.stats,'played');
+            const w    = getStat(t.stats,'wins');
+            const l    = getStat(t.stats,'losses');
+            const pts  = getStat(t.stats,'points');
+            return (i === 2 ? '<div class="qual-line"></div>' : '') +
+              `<div class="grow">
+                <div class="grow-team ${i<2 && p>0 ? 'q' : ''}">${tf(name)} ${name}</div>
+                <span class="grow-n">${p}</span><span class="grow-n">${w}</span>
+                <span class="grow-n">${l}</span><span class="grow-pts">${pts}</span>
+              </div>`;
+          }).join('');
+          return `<div class="group-card">
+            <div class="group-head"><span class="group-head-name">${gname}</span></div>
+            <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>
+            ${rows}</div>`;
+        }).join('');
+
+        if (cards) { el.innerHTML = `<div class="groups-grid">${cards}</div>`; return; }
+      }
+    } catch(_) {}
+  }
+
+  // Fallback: compute standings from match results
+  buildGroupsFromGames(games);
+}
+
+function buildGroupsFromGames(games) {
   const el = document.getElementById('wc-groups-inner');
   const gmap = {};
-  games.forEach(m=>{
-    const grp = getGroup(m); if(!grp) return;
+  games.forEach(m => {
+    const grp = getGroup(m); if (!grp || grp === 'WC 2026') return;
     const {h,a} = getTeams(m);
-    if(!gmap[grp]) gmap[grp]={};
-    [h,a].forEach(t=>{ if(t&&t!=='TBD'&&!gmap[grp][t]) gmap[grp][t]={p:0,w:0,d:0,l:0,pts:0}; });
-    if(m.score?.ft||m.result){
+    if (!gmap[grp]) gmap[grp] = {};
+    [h,a].forEach(t => { if (t && t !== 'TBD' && !gmap[grp][t]) gmap[grp][t] = {p:0,w:0,d:0,l:0,pts:0}; });
+    if (m.score?.ft || m.result) {
       const sc = getScore(m);
-      const hs=+sc.h||0, as=+sc.a||0;
-      const t1=gmap[grp][h], t2=gmap[grp][a];
-      if(!t1||!t2) return;
-      t1.p++;t2.p++;
-      if(hs>as){t1.w++;t1.pts+=3;t2.l++}
-      else if(hs<as){t2.w++;t2.pts+=3;t1.l++}
-      else{t1.d++;t2.d++;t1.pts++;t2.pts++}
+      const hs = +sc.h||0, as_ = +sc.a||0;
+      const t1 = gmap[grp][h], t2 = gmap[grp][a];
+      if (!t1 || !t2) return;
+      t1.p++; t2.p++;
+      if (hs > as_)      { t1.w++; t1.pts+=3; t2.l++; }
+      else if (hs < as_) { t2.w++; t2.pts+=3; t1.l++; }
+      else               { t1.d++; t2.d++; t1.pts++; t2.pts++; }
     }
   });
-  const groups = Object.entries(gmap).sort(([a],[b])=>a.localeCompare(b));
-  if(!groups.length){el.innerHTML='<div class="err">No group data yet</div>';return}
-  const cards = groups.map(([gname,teams])=>{
-    const sorted = Object.entries(teams).map(([n,s])=>({n,...s})).sort((a,b)=>b.pts-a.pts);
-    const rows = sorted.map((t,i)=>(i===2?'<div class="qual-line"></div>':'')+
+  const groups = Object.entries(gmap).sort(([a],[b]) => a.localeCompare(b));
+  if (!groups.length) {
+    el.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px;text-align:center">Group tables will appear once matches begin</div>';
+    return;
+  }
+  const cards = groups.map(([gname,teams]) => {
+    const sorted = Object.entries(teams).map(([n,s]) => ({n,...s})).sort((a,b) => b.pts-a.pts);
+    const rows = sorted.map((t,i) => (i===2?'<div class="qual-line"></div>':'')+
       `<div class="grow"><div class="grow-team ${i<2&&t.p>0?'q':''}">${tf(t.n)} ${t.n}</div>
        <span class="grow-n">${t.p}</span><span class="grow-n">${t.w}</span><span class="grow-n">${t.l}</span><span class="grow-pts">${t.pts}</span></div>`
     ).join('');
-    return`<div class="group-card">
+    return `<div class="group-card">
       <div class="group-head"><span class="group-head-name">${gname}</span></div>
       <div class="gcol-head"><span>Team</span><span>P</span><span>W</span><span>L</span><span>Pts</span></div>${rows}</div>`;
   }).join('');
-  el.innerHTML=`<div class="groups-grid">${cards}</div>`;
+  el.innerHTML = `<div class="groups-grid">${cards}</div>`;
 }
 
-function buildResults(matches){
+// ── Results ──────────────────────────────────────────────────────────────
+function buildResults(matches) {
   const el = document.getElementById('wc-results-inner');
-  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No results yet</div>';return}
-  el.innerHTML=`<div class="three-col">${matches.map(m=>wcCard(m)).join('')}</div>`;
+  if (!matches.length) {
+    el.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:13px">No results yet</div>';
+    return;
+  }
+  el.innerHTML = `<div class="three-col">${matches.map(m => wcCard(m)).join('')}</div>`;
 }
 
-function buildFixtures(matches){
+// ── Upcoming fixtures ─────────────────────────────────────────────────────
+function buildFixtures(matches) {
   const el = document.getElementById('wc-fixtures-inner');
-  if(!matches.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:13px">No upcoming fixtures</div>';return}
-  const rows = matches.map(m=>{
+  if (!matches.length) {
+    el.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:13px">No upcoming fixtures</div>';
+    return;
+  }
+  const rows = matches.map(m => {
     const {h,a} = getTeams(m);
     const d = getDate(m);
-    return`<div class="fix-row">
-      <div class="fix-teams">${tf(h)} <span>${tf(h)} ${h}</span><span class="fix-vs">vs</span>${tf(a)} <span>${tf(a)} ${a}</span></div>
+    return `<div class="fix-row">
+      <div class="fix-teams">${tf(h)} <span>${h}</span><span class="fix-vs">vs</span>${tf(a)} <span>${a}</span></div>
       <div class="fix-right">
-        <div class="fix-date">${d?fShort(d):''} · ${getGroup(m)}</div>
-        <div class="fix-time">${d?fTime(d):'TBD'}</div>
+        <div class="fix-date">${d ? fShort(d) : ''} · ${getGroup(m)}</div>
+        <div class="fix-time">${d ? fTime(d) : 'TBD'}</div>
       </div></div>`;
   }).join('');
-  el.innerHTML=`<div class="fix-panel">${rows}</div>`;
+  el.innerHTML = `<div class="fix-panel">${rows}</div>`;
 }
 
-function wcCard(m){
+// ── Match card renderer ───────────────────────────────────────────────────
+function wcCard(m) {
   const {h,a} = getTeams(m);
   const sc = getScore(m);
-  const hs=sc.h, as=sc.a;
-  const isLive = m.status==='live'||m.status==='1H'||m.status==='2H'||m.status==='HT';
-  const isDone = m.status==='finished'||m.status==='FT'||m.score?.ft||m.result;
-  const hw=+hs>+as, aw=+as>+hs, draw=+hs===+as&&hs!=='–';
-  let pill='';
-  if(isLive) pill=`<span class="rpill" style="background:rgba(232,0,45,0.15);color:var(--f1)">${m.minute||m.elapsed||'LIVE'}'</span>`;
-  else if(draw) pill=`<span class="rpill rpill-d">Draw</span>`;
-  else if(isDone) pill=`<span class="rpill rpill-ft">FT</span>`;
-  else { const d=getDate(m); pill=`<span class="rpill" style="background:var(--surface2);color:var(--muted2)">${d?fTime(d):'TBD'}</span>`; }
-  return`<div class="match-card" ${isLive?'style="border-color:rgba(232,0,45,0.4)"':''}>
-    <div class="match-top"><span>${getGroup(m)} · ${getDate(m)?fShort(getDate(m)):''}</span>${pill}</div>
+  const hs = sc.h, as_ = sc.a;
+  const isLive = m.status === 'live';
+  const isDone = m.status === 'FT' || m.score?.ft || m.result;
+  const hw = +hs > +as_, aw = +as_ > +hs, draw = +hs === +as_ && hs !== '–';
+  let pill = '';
+  if (isLive)       pill = `<span class="rpill" style="background:rgba(232,0,45,0.15);color:var(--f1)">${m.minute||'LIVE'}'</span>`;
+  else if (draw)    pill = `<span class="rpill rpill-d">Draw</span>`;
+  else if (isDone)  pill = `<span class="rpill rpill-ft">FT</span>`;
+  else { const d = getDate(m); pill = `<span class="rpill" style="background:var(--surface2);color:var(--muted2)">${d ? fTime(d) : 'TBD'}</span>`; }
+  return `<div class="match-card" ${isLive?'style="border-color:rgba(232,0,45,0.4)"':''}>
+    <div class="match-top"><span>${getGroup(m)} · ${getDate(m) ? fShort(getDate(m)) : ''}</span>${pill}</div>
     <div class="match-body">
-      <div class="mt"><span class="mt-flag">${tf(h)}</span><span class="mt-name">${tf(h)} ${h}</span></div>
-      <div class="score-box"><span class="${hw?'sw':'sl'}">${hs}</span><span class="ssep">–</span><span class="${aw?'sw':'sl'}">${as}</span></div>
-      <div class="mt"><span class="mt-flag">${tf(a)}</span><span class="mt-name">${tf(a)} ${a}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(h)}</span><span class="mt-name">${h}</span></div>
+      <div class="score-box"><span class="${hw?'sw':'sl'}">${hs}</span><span class="ssep">–</span><span class="${aw?'sw':'sl'}">${as_}</span></div>
+      <div class="mt"><span class="mt-flag">${tf(a)}</span><span class="mt-name">${a}</span></div>
     </div></div>`;
 }
 
